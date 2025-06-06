@@ -45,6 +45,7 @@ type_defs = gql("""
         pep_flag: Boolean
         sanctions_screened: Boolean
         created_at: String
+        portfolios: [Portfolio!]!
     }
 
     type Position {
@@ -52,6 +53,7 @@ type_defs = gql("""
         quantity: Float!
         market_value: Float!
         currency: String!
+        instrument: FinancialInstrument
     }
 
     type Portfolio {
@@ -89,9 +91,9 @@ type_defs = gql("""
         getPartner(id: ID!): Partner
         getPortfolio(id: ID!): Portfolio
         getFinancialInstrument(id: ID!): FinancialInstrument
-        searchPartners(query: String!): [Partner!]!
-        searchPortfolios(query: String!): [Portfolio!]!
-        searchFinancialInstruments(query: String!): [FinancialInstrument!]!
+        searchPartners(query: String, id: ID): [Partner!]!
+        searchPortfolios(query: String, id: ID): [Portfolio!]!
+        searchFinancialInstruments(query: String, id: ID): [FinancialInstrument!]!
     }
 """)
 
@@ -99,31 +101,62 @@ type_defs = gql("""
 query = QueryType()
 
 @query.field("searchPartners")
-def resolve_search_partners(_, info, query):
-    res = client.search(index="partners", body={
-        "query": {"multi_match": {"query": query, "fields": ["name", "partner_type", "residency_country", "nationality"]}}
-    })
-    return [hit["_source"] for hit in res["hits"]["hits"]]
+def resolve_search_partners(_, info, query=None, id=None):
+    if query is None and id is None:
+        raise ValueError("Either query or id must be provided")
+
+    if id is not None:
+        # Search by ID
+        search_query = {"term": {"id": id}}
+    else:
+        # Search by query string
+        search_query = {"multi_match": {"query": query, "fields": ["name", "partner_type", "residency_country", "nationality"]}}
+
+    res = client.search(index="partners", body={"query": search_query})
+
+    # Return results with _id included
+    return [{"id": hit["_id"], **hit["_source"]} for hit in res["hits"]["hits"]]
 
 @query.field("searchPortfolios")
-def resolve_search_portfolios(_, info, query):
-    res = client.search(index="portfolios", body={
-        "query": {"multi_match": {"query": query, "fields": ["name", "currency", "owner_id"]}}
-    })
-    return [hit["_source"] for hit in res["hits"]["hits"]]
+def resolve_search_portfolios(_, info, query=None, id=None):
+    if query is None and id is None:
+        raise ValueError("Either query or id must be provided")
+
+    if id is not None:
+        # Search by ID
+        search_query = {"term": {"id": id}}
+    else:
+        # Search by query string
+        search_query = {"multi_match": {"query": query, "fields": ["name", "currency", "owner_id"]}}
+
+    res = client.search(index="portfolios", body={"query": search_query})
+
+    # Return results with _id included
+    return [{"id": hit["_id"], **hit["_source"]} for hit in res["hits"]["hits"]]
 
 @query.field("searchFinancialInstruments")
-def resolve_search_financial_instruments(_, info, query):
-    res = client.search(index="financial_instruments", body={
-        "query": {"multi_match": {"query": query, "fields": ["name", "issuer", "type", "isin", "currency", "country"]}}
-    })
-    return [hit["_source"] for hit in res["hits"]["hits"]]
+def resolve_search_financial_instruments(_, info, query=None, id=None):
+    if query is None and id is None:
+        raise ValueError("Either query or id must be provided")
+
+    if id is not None:
+        # Search by ID
+        search_query = {"term": {"id": id}}
+    else:
+        # Search by query string
+        search_query = {"multi_match": {"query": query, "fields": ["name", "issuer", "type", "isin", "currency", "country"]}}
+
+    res = client.search(index="financial_instruments", body={"query": search_query})
+
+    # Return results with _id included
+    return [{"id": hit["_id"], **hit["_source"]} for hit in res["hits"]["hits"]]
 
 # Define the resolver function
 def resolve_get_partner(_, info, id):
     try:
         res = client.get(index="partners", id=id)
-        return res["_source"]
+        # Include the ID in the response
+        return {"id": res["_id"], **res["_source"]}
     except Exception as e:
         print(f"Error retrieving partner: {e}")
         return None
@@ -135,7 +168,8 @@ query.set_field("getPartner", resolve_get_partner)
 def resolve_get_portfolio(_, info, id):
     try:
         res = client.get(index="portfolios", id=id)
-        return res["_source"]
+        # Include the ID in the response
+        return {"id": res["_id"], **res["_source"]}
     except Exception as e:
         print(f"Error retrieving portfolio: {e}")
         return None
@@ -147,7 +181,8 @@ query.set_field("getPortfolio", resolve_get_portfolio)
 def resolve_get_financial_instrument(_, info, id):
     try:
         res = client.get(index="financial_instruments", id=id)
-        return res["_source"]
+        # Include the ID in the response
+        return {"id": res["_id"], **res["_source"]}
     except Exception as e:
         print(f"Error retrieving financial instrument: {e}")
         return None
@@ -155,8 +190,40 @@ def resolve_get_financial_instrument(_, info, id):
 # Register the resolver using set_field method
 query.set_field("getFinancialInstrument", resolve_get_financial_instrument)
 
+# Define resolvers for the new fields
+from ariadne import ObjectType
+
+partner_type = ObjectType("Partner")
+position_type = ObjectType("Position")
+portfolio_type = ObjectType("Portfolio")
+
+@partner_type.field("portfolios")
+def resolve_partner_portfolios(partner, info):
+    # Get all portfolios for this partner
+    search_query = {"match": {"owner_id": partner["id"]}}
+    res = client.search(index="portfolios", body={"query": search_query})
+
+    # Return results with _id included
+    return [{"id": hit["_id"], **hit["_source"]} for hit in res["hits"]["hits"]]
+
+@portfolio_type.field("positions")
+def resolve_portfolio_positions(portfolio, info):
+    # Return the positions array from the portfolio
+    return portfolio.get("positions", [])
+
+@position_type.field("instrument")
+def resolve_position_instrument(position, info):
+    try:
+        # Get the instrument for this position
+        res = client.get(index="financial_instruments", id=position["instrument_id"])
+        # Include the ID in the response
+        return {"id": res["_id"], **res["_source"]}
+    except Exception as e:
+        print(f"Error retrieving financial instrument: {e}")
+        return None
+
 print("Building schema...")
-schema = make_executable_schema(type_defs, query)
+schema = make_executable_schema(type_defs, query, partner_type, position_type, portfolio_type)
 
 # ASGI app
 app = Starlette()
