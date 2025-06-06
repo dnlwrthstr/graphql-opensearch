@@ -119,3 +119,26 @@ You can modify `seed_data.py` to add more sample data or create a more sophistic
 ### Extending the Schema
 
 To add more types or queries, modify the GraphQL schema in `server.py` and add corresponding resolvers.
+
+### Pushing to a Remote Repository
+
+To push this repository to a remote Git repository (like GitHub, GitLab, or Bitbucket), follow these steps:
+
+1. Create a new repository on your Git hosting service (GitHub, GitLab, Bitbucket, etc.)
+   - Do not initialize it with a README, .gitignore, or license
+
+2. Add the remote repository URL to your local repository:
+   ```bash
+   git remote add origin <remote_repository_url>
+   ```
+   Replace `<remote_repository_url>` with the URL of your remote repository, for example:
+   - HTTPS: `https://github.com/username/graphql-opensearch.git`
+   - SSH: `git@github.com:username/graphql-opensearch.git`
+
+3. Push your local repository to the remote repository:
+   ```bash
+   git push -u origin main
+   ```
+   This sets up tracking between your local `main` branch and the remote `main` branch.
+
+4. Verify that your repository has been pushed successfully by visiting the URL of your remote repository.
