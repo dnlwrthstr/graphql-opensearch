@@ -150,3 +150,16 @@ code {
 .partner-results-table .no-value {
   color: #999;
 }
+
+/* Loading and error indicators */
+.loading-indicator {
+  font-size: 0.8rem;
+  color: #3498db;
+  margin-left: 5px;
+}
+
+.error-message {
+  font-size: 0.8rem;
+  color: #e74c3c;
+  margin-left: 5px;
+}

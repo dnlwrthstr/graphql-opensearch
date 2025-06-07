@@ -103,6 +103,11 @@ type_defs = gql("""
         currency: String
     }
 
+    type CountryValue {
+        value: String!
+        count: Int!
+    }
+
     type Query {
         getPartner(id: ID!): Partner
         getPortfolio(id: ID!): Portfolio
@@ -113,6 +118,7 @@ type_defs = gql("""
         autocompletePartnerName(query: String!): [PartnerSuggestion!]!
         autocompleteInstrumentName(query: String!): [InstrumentSuggestion!]!
         getPortfoliosByInstrument(instrument_id: ID!): [Portfolio!]!
+        getUniqueCountryValues(field: String!, filter: String): [CountryValue!]!
     }
 """)
 
@@ -532,6 +538,71 @@ def resolve_portfolios_by_instrument(_, info, instrument_id):
 
 # Register the resolver for getPortfoliosByInstrument
 query.set_field("getPortfoliosByInstrument", resolve_portfolios_by_instrument)
+
+# Define resolver for getUniqueCountryValues
+def resolve_unique_country_values(_, info, field, filter=None):
+    """
+    Resolver for getUniqueCountryValues query.
+    Returns unique values for the specified field (nationality or residency_country).
+    If filter is provided, it will filter the results based on the other field.
+    """
+    try:
+        # Validate the field parameter
+        if field not in ["nationality", "residency_country"]:
+            raise ValueError(f"Invalid field: {field}. Must be 'nationality' or 'residency_country'")
+
+        # Build the query
+        query_body = {
+            "size": 0,  # We only want aggregation results, not documents
+            "aggs": {
+                "unique_values": {
+                    "terms": {
+                        "field": field,
+                        "size": 100,  # Get up to 100 unique values
+                        "missing": "null"  # Include documents where the field is missing
+                    }
+                }
+            }
+        }
+
+        # If filter is provided, add a filter to the query
+        if filter:
+            # The filter is expected to be in the format "field:value"
+            if ":" in filter:
+                filter_field, filter_value = filter.split(":", 1)
+                if filter_field in ["nationality", "residency_country"] and filter_field != field:
+                    query_body["query"] = {
+                        "term": {
+                            filter_field: filter_value
+                        }
+                    }
+
+        # Execute the query
+        res = client.search(index="partners", body=query_body)
+
+        # Extract the buckets from the aggregation results
+        buckets = res["aggregations"]["unique_values"]["buckets"]
+
+        # Convert the buckets to the expected format
+        result = []
+        for bucket in buckets:
+            # Skip null values
+            if bucket["key"] == "null":
+                continue
+
+            # Add the value and count to the result
+            result.append({
+                "value": bucket["key"],
+                "count": bucket["doc_count"]
+            })
+
+        return result
+    except Exception as e:
+        print(f"Error retrieving unique country values: {e}")
+        return []
+
+# Register the resolver for getUniqueCountryValues
+query.set_field("getUniqueCountryValues", resolve_unique_country_values)
 
 # Define resolvers for the new fields
 from ariadne import ObjectType

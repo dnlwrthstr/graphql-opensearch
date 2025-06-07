@@ -24,6 +24,16 @@ const SEARCH_PARTNERS = gql`
   }
 `;
 
+// GraphQL query for getting unique country values
+const GET_UNIQUE_COUNTRY_VALUES = gql`
+  query GetUniqueCountryValues($field: String!, $filter: String) {
+    getUniqueCountryValues(field: $field, filter: $filter) {
+      value
+      count
+    }
+  }
+`;
+
 function AdvancedPartnerSearch() {
   const [searchParams, setSearchParams] = useState({
     name: '',
@@ -43,9 +53,28 @@ function AdvancedPartnerSearch() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchId, setSearchId] = useState(null);
 
+  // Query for search results
   const { loading, error, data } = useQuery(SEARCH_PARTNERS, {
     variables: { query: searchQuery, id: searchId },
     skip: !executeQuery
+  });
+
+  // Query for unique nationality values
+  const { loading: loadingNationalities, error: errorNationalities, data: nationalityData } = useQuery(GET_UNIQUE_COUNTRY_VALUES, {
+    variables: { 
+      field: "nationality",
+      filter: searchParams.residency_country ? `residency_country:${searchParams.residency_country}` : null
+    },
+    fetchPolicy: "network-only" // Don't cache this query
+  });
+
+  // Query for unique residency_country values
+  const { loading: loadingResidencies, error: errorResidencies, data: residencyData } = useQuery(GET_UNIQUE_COUNTRY_VALUES, {
+    variables: { 
+      field: "residency_country",
+      filter: searchParams.nationality ? `nationality:${searchParams.nationality}` : null
+    },
+    fetchPolicy: "network-only" // Don't cache this query
   });
 
   const handleInputChange = (e) => {
@@ -150,24 +179,42 @@ function AdvancedPartnerSearch() {
 
           <div className="input-group">
             <label>Residency Country:</label>
-            <input
-              type="text"
+            <select
               name="residency_country"
               value={searchParams.residency_country}
               onChange={handleInputChange}
-              placeholder="Country code (e.g., US, UK, DE)..."
-            />
+            >
+              <option value="">Select...</option>
+              {!loadingResidencies && !errorResidencies && residencyData && residencyData.getUniqueCountryValues && 
+                residencyData.getUniqueCountryValues.map(country => (
+                  <option key={country.value} value={country.value}>
+                    {country.value} ({country.count})
+                  </option>
+                ))
+              }
+            </select>
+            {loadingResidencies && <span className="loading-indicator">Loading...</span>}
+            {errorResidencies && <span className="error-message">Error loading countries</span>}
           </div>
 
           <div className="input-group">
             <label>Nationality:</label>
-            <input
-              type="text"
+            <select
               name="nationality"
               value={searchParams.nationality}
               onChange={handleInputChange}
-              placeholder="Country code (e.g., US, UK, DE)..."
-            />
+            >
+              <option value="">Select...</option>
+              {!loadingNationalities && !errorNationalities && nationalityData && nationalityData.getUniqueCountryValues && 
+                nationalityData.getUniqueCountryValues.map(country => (
+                  <option key={country.value} value={country.value}>
+                    {country.value} ({country.count})
+                  </option>
+                ))
+              }
+            </select>
+            {loadingNationalities && <span className="loading-indicator">Loading...</span>}
+            {errorNationalities && <span className="error-message">Error loading countries</span>}
           </div>
 
           <div className="input-group">
