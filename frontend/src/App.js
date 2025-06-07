@@ -8,6 +8,7 @@ import Navigation from './components/Navigation';
 import PartnerPortfolioView from './components/PartnerPortfolioView';
 import SimplePartnerSearch from './components/SimplePartnerSearch';
 import AdvancedPartnerSearch from './components/AdvancedPartnerSearch';
+import SimpleInstrumentSearch from './components/SimpleInstrumentSearch';
 
 // Initialize Apollo Client
 const client = new ApolloClient({
@@ -30,6 +31,7 @@ function App() {
               <Route path="/" element={<PartnerPortfolioView />} />
               <Route path="/simple-search" element={<SimplePartnerSearch />} />
               <Route path="/advanced-search" element={<AdvancedPartnerSearch />} />
+              <Route path="/simple-instrument-search" element={<SimpleInstrumentSearch />} />
             </Routes>
           </main>
         </div>

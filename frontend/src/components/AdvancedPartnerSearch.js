@@ -56,6 +56,7 @@ function AdvancedPartnerSearch() {
   const [searchId, setSearchId] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [lastSearched, setLastSearched] = useState('');
 
   const { loading, error, data } = useQuery(SEARCH_PARTNERS, {
     variables: { query: searchQuery, id: searchId },
@@ -79,16 +80,17 @@ function AdvancedPartnerSearch() {
   // Debounce function for autocomplete
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (searchParams.name && searchParams.name.length >= 2) {
+      if (searchParams.name && searchParams.name.length >= 2 && searchParams.name !== lastSearched) {
         getAutocompleteSuggestions({ variables: { query: searchParams.name } });
-      } else {
+        setLastSearched(searchParams.name);
+      } else if (!searchParams.name || searchParams.name.length < 2) {
         setSuggestions([]);
         setShowSuggestions(false);
       }
     }, 300); // 300ms debounce
 
     return () => clearTimeout(timer);
-  }, [searchParams.name, getAutocompleteSuggestions]);
+  }, [searchParams.name, getAutocompleteSuggestions, lastSearched]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -108,6 +110,7 @@ function AdvancedPartnerSearch() {
 
     setSearchParams(updatedParams);
     setShowSuggestions(false);
+    setLastSearched(suggestion.name); // Update lastSearched to prevent dropdown from reopening
 
     // Immediately execute search by ID only
     setSearchQuery('');
@@ -165,6 +168,7 @@ function AdvancedPartnerSearch() {
     setSearchQuery('');
     setSearchId(null);
     setExecuteQuery(false);
+    setLastSearched(''); // Reset lastSearched to ensure dropdown behavior is consistent
   };
 
   return (
@@ -181,7 +185,7 @@ function AdvancedPartnerSearch() {
                 value={searchParams.name}
                 onChange={handleInputChange}
                 placeholder="Partner name..."
-                onFocus={() => searchParams.name.length >= 2 && setShowSuggestions(true)}
+                onFocus={() => searchParams.name.length >= 2 && searchParams.name !== lastSearched && setShowSuggestions(true)}
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
               />
               {showSuggestions && suggestions.length > 0 && (

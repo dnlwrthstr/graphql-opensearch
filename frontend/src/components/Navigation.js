@@ -31,6 +31,14 @@ function Navigation() {
             Advanced Partner Search
           </NavLink>
         </li>
+        <li>
+          <NavLink 
+            to="/simple-instrument-search" 
+            className={({ isActive }) => isActive ? "active-nav-link" : "nav-link"}
+          >
+            Simple Instrument Search
+          </NavLink>
+        </li>
       </ul>
     </nav>
   );

@@ -94,6 +94,14 @@ type_defs = gql("""
         nationality: String
     }
 
+    type InstrumentSuggestion {
+        id: ID!
+        name: String!
+        isin: String!
+        type: String
+        currency: String
+    }
+
     type Query {
         getPartner(id: ID!): Partner
         getPortfolio(id: ID!): Portfolio
@@ -102,6 +110,7 @@ type_defs = gql("""
         searchPortfolios(query: String, id: ID): [Portfolio!]!
         searchFinancialInstruments(query: String, id: ID): [FinancialInstrument!]!
         autocompletePartnerName(query: String!): [PartnerSuggestion!]!
+        autocompleteInstrumentName(query: String!): [InstrumentSuggestion!]!
     }
 """)
 
@@ -247,6 +256,44 @@ def resolve_autocomplete_partner_name(_, info, query):
 
 # Register the resolver for autocompletePartnerName
 query.set_field("autocompletePartnerName", resolve_autocomplete_partner_name)
+
+# Define the resolver function for autocompleteInstrumentName
+def resolve_autocomplete_instrument_name(_, info, query):
+    try:
+        # Use a multi-match query to search in both name and ISIN fields
+        search_query = {
+            "query": {
+                "multi_match": {
+                    "query": query,
+                    "fields": ["name", "isin"],
+                    "type": "phrase_prefix"
+                }
+            },
+            "size": 10
+        }
+
+        res = client.search(index="financial_instruments", body=search_query)
+
+        # Extract suggestions from the response
+        suggestions = []
+        for hit in res["hits"]["hits"]:
+            instrument = hit["_source"]
+            suggestion = {
+                "id": hit["_id"],
+                "name": instrument.get("name", ""),
+                "isin": instrument.get("isin", ""),
+                "type": instrument.get("type", ""),
+                "currency": instrument.get("currency", "")
+            }
+            suggestions.append(suggestion)
+
+        return suggestions
+    except Exception as e:
+        print(f"Error getting instrument suggestions: {e}")
+        return []
+
+# Register the resolver for autocompleteInstrumentName
+query.set_field("autocompleteInstrumentName", resolve_autocomplete_instrument_name)
 
 # Define resolvers for the new fields
 from ariadne import ObjectType

@@ -52,6 +52,7 @@ function SimplePartnerSearch() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedPartnerId, setSelectedPartnerId] = useState(null);
   const [expandedPortfolios, setExpandedPortfolios] = useState({});
+  const [lastSearched, setLastSearched] = useState('');
 
   // Lazy query for autocomplete
   const [getAutocompleteSuggestions, { loading: autocompleteLoading, data: autocompleteData }] = useLazyQuery(
@@ -78,16 +79,17 @@ function SimplePartnerSearch() {
   // Debounce function for autocomplete
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (partnerName && partnerName.length >= 2) {
+      if (partnerName && partnerName.length >= 2 && partnerName !== lastSearched) {
         getAutocompleteSuggestions({ variables: { query: partnerName } });
-      } else {
+        setLastSearched(partnerName);
+      } else if (!partnerName || partnerName.length < 2) {
         setSuggestions([]);
         setShowSuggestions(false);
       }
     }, 300); // 300ms debounce
 
     return () => clearTimeout(timer);
-  }, [partnerName, getAutocompleteSuggestions]);
+  }, [partnerName, getAutocompleteSuggestions, lastSearched]);
 
   const handleInputChange = (e) => {
     setPartnerName(e.target.value);
@@ -98,6 +100,7 @@ function SimplePartnerSearch() {
     setPartnerName(suggestion.name);
     setShowSuggestions(false);
     setSelectedPartnerId(suggestion.id);
+    setLastSearched(suggestion.name); // Update lastSearched to prevent dropdown from reopening
     getPartnerWithPortfolios({ variables: { id: suggestion.id } });
   };
 
@@ -120,7 +123,7 @@ function SimplePartnerSearch() {
               value={partnerName}
               onChange={handleInputChange}
               placeholder="Enter partner name..."
-              onFocus={() => partnerName.length >= 2 && setShowSuggestions(true)}
+              onFocus={() => partnerName.length >= 2 && partnerName !== lastSearched && setShowSuggestions(true)}
               onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
             />
             {showSuggestions && suggestions.length > 0 && (
