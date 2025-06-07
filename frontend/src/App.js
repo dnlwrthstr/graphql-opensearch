@@ -6,6 +6,7 @@ import './App.css';
 // Import components
 import Navigation from './components/Navigation';
 import PartnerPortfolioView from './components/PartnerPortfolioView';
+import SimplePartnerSearch from './components/SimplePartnerSearch';
 import AdvancedPartnerSearch from './components/AdvancedPartnerSearch';
 
 // Initialize Apollo Client
@@ -27,6 +28,7 @@ function App() {
           <main>
             <Routes>
               <Route path="/" element={<PartnerPortfolioView />} />
+              <Route path="/simple-search" element={<SimplePartnerSearch />} />
               <Route path="/advanced-search" element={<AdvancedPartnerSearch />} />
             </Routes>
           </main>

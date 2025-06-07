@@ -3,8 +3,8 @@ import { gql, useQuery, useLazyQuery } from '@apollo/client';
 
 // GraphQL query for searching partners
 const SEARCH_PARTNERS = gql`
-  query SearchPartners($query: String) {
-    searchPartners(query: $query) {
+  query SearchPartners($query: String, $id: ID) {
+    searchPartners(query: $query, id: $id) {
       id
       partner_type
       name
@@ -53,11 +53,12 @@ function AdvancedPartnerSearch() {
 
   const [executeQuery, setExecuteQuery] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchId, setSearchId] = useState(null);
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   const { loading, error, data } = useQuery(SEARCH_PARTNERS, {
-    variables: { query: searchQuery },
+    variables: { query: searchQuery, id: searchId },
     skip: !executeQuery
   });
 
@@ -98,12 +99,20 @@ function AdvancedPartnerSearch() {
   };
 
   const handleSuggestionClick = (suggestion) => {
-    setSearchParams({
+    // Only update name and partner_id from the suggestion
+    const updatedParams = {
       ...searchParams,
       name: suggestion.name,
       partner_id: suggestion.id
-    });
+    };
+
+    setSearchParams(updatedParams);
     setShowSuggestions(false);
+
+    // Immediately execute search by ID only
+    setSearchQuery('');
+    setSearchId(suggestion.id);
+    setExecuteQuery(true);
   };
 
   const handleCheckboxChange = (e) => {
@@ -117,21 +126,25 @@ function AdvancedPartnerSearch() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Build search query from non-empty parameters
-    const queryParts = [];
-    Object.entries(searchParams).forEach(([key, value]) => {
-      if (value) {
-        // Map partner_id to id in the search query
-        if (key === 'partner_id') {
-          queryParts.push(`id:${value}`);
-        } else {
+    // Check if partner_id is provided
+    if (searchParams.partner_id) {
+      // If partner_id is provided, use it directly for ID search
+      setSearchId(searchParams.partner_id);
+      setSearchQuery('');
+    } else {
+      // Build search query from non-empty parameters (excluding partner_id)
+      const queryParts = [];
+      Object.entries(searchParams).forEach(([key, value]) => {
+        if (value && key !== 'partner_id') {
           queryParts.push(`${key}:${value}`);
         }
-      }
-    });
+      });
 
-    const query = queryParts.join(' AND ');
-    setSearchQuery(query);
+      const query = queryParts.join(' AND ');
+      setSearchQuery(query);
+      setSearchId(null);
+    }
+
     setExecuteQuery(true);
   };
 
@@ -149,6 +162,8 @@ function AdvancedPartnerSearch() {
       pep_flag: '',
       sanctions_screened: ''
     });
+    setSearchQuery('');
+    setSearchId(null);
     setExecuteQuery(false);
   };
 

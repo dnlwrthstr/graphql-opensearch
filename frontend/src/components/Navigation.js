@@ -17,6 +17,14 @@ function Navigation() {
         </li>
         <li>
           <NavLink 
+            to="/simple-search" 
+            className={({ isActive }) => isActive ? "active-nav-link" : "nav-link"}
+          >
+            Simple Partner Search
+          </NavLink>
+        </li>
+        <li>
+          <NavLink 
             to="/advanced-search" 
             className={({ isActive }) => isActive ? "active-nav-link" : "nav-link"}
           >
