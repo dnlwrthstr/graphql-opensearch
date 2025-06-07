@@ -8,33 +8,7 @@ const client = new ApolloClient({
   cache: new InMemoryCache()
 });
 
-// GraphQL query for financial instruments
-const SEARCH_INSTRUMENTS = gql`
-  query SearchInstruments($query: String, $id: ID) {
-    searchFinancialInstruments(query: $query, id: $id) {
-      id
-      name
-      type
-      isin
-      currency
-    }
-  }
-`;
-
-// GraphQL query for partners
-const SEARCH_PARTNERS = gql`
-  query SearchPartners($query: String, $id: ID) {
-    searchPartners(query: $query, id: $id) {
-      id
-      name
-      partner_type
-      residency_country
-      kyc_status
-    }
-  }
-`;
-
-// GraphQL query for portfolio overview
+// GraphQL query for partner portfolio view
 const GET_PARTNER_WITH_PORTFOLIOS = gql`
   query GetPartnerWithPortfolios($id: ID!) {
     getPartner(id: $id) {
@@ -71,6 +45,13 @@ const GET_PARTNER_WITH_PORTFOLIOS = gql`
             currency
             type
             rating
+            country
+            issue_date
+            maturity_date
+            sector
+            coupon
+            face_value
+            exchange
           }
         }
       }
@@ -78,166 +59,8 @@ const GET_PARTNER_WITH_PORTFOLIOS = gql`
   }
 `;
 
-// Financial Instruments Search Component
-function InstrumentsSearch() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchId, setSearchId] = useState('');
-  const [executeSearch, setExecuteSearch] = useState(false);
-
-  const { loading, error, data } = useQuery(SEARCH_INSTRUMENTS, {
-    variables: { 
-      query: searchQuery || undefined,
-      id: searchId || undefined
-    },
-    skip: !executeSearch
-  });
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    setExecuteSearch(true);
-  };
-
-  return (
-    <div className="search-container">
-      <h2>Search Financial Instruments</h2>
-      <form onSubmit={handleSearch}>
-        <div className="search-inputs">
-          <div className="input-group">
-            <label>Search by term:</label>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setExecuteSearch(false);
-              }}
-              placeholder="Enter search term..."
-            />
-          </div>
-          <div className="input-group">
-            <label>Search by ID:</label>
-            <input
-              type="text"
-              value={searchId}
-              onChange={(e) => {
-                setSearchId(e.target.value);
-                setExecuteSearch(false);
-              }}
-              placeholder="Enter ID..."
-            />
-          </div>
-        </div>
-        <button type="submit">Search</button>
-      </form>
-
-      {loading && <p>Loading...</p>}
-      {error && <p>Error: {error.message}</p>}
-
-      {data && data.searchFinancialInstruments && (
-        <div className="results">
-          <h3>Results:</h3>
-          {data.searchFinancialInstruments.length === 0 ? (
-            <p>No instruments found</p>
-          ) : (
-            <ul>
-              {data.searchFinancialInstruments.map(instrument => (
-                <li key={instrument.id}>
-                  <strong>{instrument.name}</strong> ({instrument.type})
-                  <br />
-                  ID: {instrument.id}
-                  <br />
-                  ISIN: {instrument.isin}, Currency: {instrument.currency}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// Partners Search Component
-function PartnersSearch() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchId, setSearchId] = useState('');
-  const [executeSearch, setExecuteSearch] = useState(false);
-
-  const { loading, error, data } = useQuery(SEARCH_PARTNERS, {
-    variables: { 
-      query: searchQuery || undefined,
-      id: searchId || undefined
-    },
-    skip: !executeSearch
-  });
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    setExecuteSearch(true);
-  };
-
-  return (
-    <div className="search-container">
-      <h2>Search Partners</h2>
-      <form onSubmit={handleSearch}>
-        <div className="search-inputs">
-          <div className="input-group">
-            <label>Search by term:</label>
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setExecuteSearch(false);
-              }}
-              placeholder="Enter search term..."
-            />
-          </div>
-          <div className="input-group">
-            <label>Search by ID:</label>
-            <input
-              type="text"
-              value={searchId}
-              onChange={(e) => {
-                setSearchId(e.target.value);
-                setExecuteSearch(false);
-              }}
-              placeholder="Enter ID..."
-            />
-          </div>
-        </div>
-        <button type="submit">Search</button>
-      </form>
-
-      {loading && <p>Loading...</p>}
-      {error && <p>Error: {error.message}</p>}
-
-      {data && data.searchPartners && (
-        <div className="results">
-          <h3>Results:</h3>
-          {data.searchPartners.length === 0 ? (
-            <p>No partners found</p>
-          ) : (
-            <ul>
-              {data.searchPartners.map(partner => (
-                <li key={partner.id}>
-                  <strong>{partner.name}</strong> ({partner.partner_type})
-                  <br />
-                  ID: {partner.id}
-                  <br />
-                  Country: {partner.residency_country}, Status: {partner.kyc_status}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// Portfolio Overview Component
-function PortfolioOverview() {
+// Partner Portfolio View Component
+function PartnerPortfolioView() {
   const [partnerId, setPartnerId] = useState('');
   const [executeQuery, setExecuteQuery] = useState(false);
   const [expandedPortfolios, setExpandedPortfolios] = useState({});
@@ -260,8 +83,8 @@ function PortfolioOverview() {
   };
 
   return (
-    <div className="portfolio-overview-container">
-      <h2>Portfolio Overview</h2>
+    <div className="partner-portfolio-view-container">
+      <h2>Partner Portfolio View</h2>
       <form onSubmit={handleSubmit}>
         <div className="input-group">
           <label>Partner ID:</label>
@@ -276,33 +99,17 @@ function PortfolioOverview() {
             required
           />
         </div>
-        <button type="submit">View Portfolios</button>
+        <button type="submit">View Partner</button>
       </form>
 
       {loading && <p>Loading...</p>}
       {error && <p>Error: {error.message}</p>}
 
       {data && data.getPartner && (
-        <div className="portfolio-content">
-          <div className="partner-details">
-            <h3>Partner Details</h3>
-            <div className="partner-info">
-              <p><strong>ID:</strong> {data.getPartner.id}</p>
-              <p><strong>Name:</strong> {data.getPartner.name}</p>
-              <p><strong>Type:</strong> {data.getPartner.partner_type}</p>
-              {data.getPartner.birth_date && <p><strong>Birth Date:</strong> {data.getPartner.birth_date}</p>}
-              {data.getPartner.incorporation_date && <p><strong>Incorporation Date:</strong> {data.getPartner.incorporation_date}</p>}
-              <p><strong>Residency Country:</strong> {data.getPartner.residency_country}</p>
-              <p><strong>Tax ID:</strong> {data.getPartner.tax_id}</p>
-              {data.getPartner.nationality && <p><strong>Nationality:</strong> {data.getPartner.nationality}</p>}
-              {data.getPartner.legal_entity_type && <p><strong>Legal Entity Type:</strong> {data.getPartner.legal_entity_type}</p>}
-              <p><strong>KYC Status:</strong> {data.getPartner.kyc_status}</p>
-              <p><strong>Risk Level:</strong> {data.getPartner.risk_level}</p>
-              <p><strong>Account Type:</strong> {data.getPartner.account_type}</p>
-              <p><strong>PEP Flag:</strong> {data.getPartner.pep_flag ? 'Yes' : 'No'}</p>
-              <p><strong>Sanctions Screened:</strong> {data.getPartner.sanctions_screened ? 'Yes' : 'No'}</p>
-              <p><strong>Created At:</strong> {data.getPartner.created_at}</p>
-            </div>
+        <div className="partner-portfolio-content">
+          <div className="partner-info">
+            <h3>{data.getPartner.name}</h3>
+            <p>Partner ID: {data.getPartner.id} | Type: {data.getPartner.partner_type}</p>
           </div>
 
           <div className="portfolios-section">
@@ -319,10 +126,7 @@ function PortfolioOverview() {
                     >
                       <h4>{portfolio.name}</h4>
                       <div className="portfolio-summary">
-                        <p><strong>ID:</strong> {portfolio.id}</p>
-                        <p><strong>Currency:</strong> {portfolio.currency}</p>
-                        <p><strong>Created:</strong> {portfolio.created_at}</p>
-                        <p><strong>Positions:</strong> {portfolio.positions.length}</p>
+                        <p>Currency: {portfolio.currency} | Created: {portfolio.created_at} | Positions: {portfolio.positions.length}</p>
                       </div>
                       <span>{expandedPortfolios[portfolio.id] ? '▼' : '►'}</span>
                     </div>
@@ -336,32 +140,51 @@ function PortfolioOverview() {
                           <table>
                             <thead>
                               <tr>
-                                <th>Instrument</th>
+                                <th>Instrument Name</th>
+                                <th>ISIN</th>
+                                <th>Type</th>
                                 <th>Quantity</th>
                                 <th>Market Value</th>
                                 <th>Currency</th>
-                                <th>Details</th>
+                                <th>Issuer</th>
+                                <th>Rating</th>
+                                <th>Country</th>
+                                <th>Issue Date</th>
+                                <th>Maturity Date</th>
+                                {/* Only show these columns if at least one position has these values */}
+                                {portfolio.positions.some(p => p.instrument && p.instrument.sector) && <th>Sector</th>}
+                                {portfolio.positions.some(p => p.instrument && p.instrument.coupon) && <th>Coupon</th>}
+                                {portfolio.positions.some(p => p.instrument && p.instrument.face_value) && <th>Face Value</th>}
+                                {portfolio.positions.some(p => p.instrument && p.instrument.exchange) && <th>Exchange</th>}
                               </tr>
                             </thead>
                             <tbody>
-                              {portfolio.positions.map((position, index) => (
-                                <tr key={index}>
-                                  <td>{position.instrument ? position.instrument.name : 'Unknown'}</td>
-                                  <td>{position.quantity.toLocaleString()}</td>
-                                  <td>{position.market_value.toLocaleString()}</td>
-                                  <td>{position.currency}</td>
-                                  <td>
-                                    {position.instrument && (
-                                      <>
-                                        <p><strong>ISIN:</strong> {position.instrument.isin}</p>
-                                        <p><strong>Issuer:</strong> {position.instrument.issuer}</p>
-                                        <p><strong>Type:</strong> {position.instrument.type}</p>
-                                        <p><strong>Rating:</strong> {position.instrument.rating}</p>
-                                      </>
-                                    )}
-                                  </td>
-                                </tr>
-                              ))}
+                              {portfolio.positions.map((position, index) => {
+                                const instrument = position.instrument || {};
+                                return (
+                                  <tr key={index}>
+                                    <td>{instrument.name || 'Unknown'}</td>
+                                    <td>{instrument.isin || 'N/A'}</td>
+                                    <td>{instrument.type || 'N/A'}</td>
+                                    <td>{position.quantity ? position.quantity.toLocaleString() : 'N/A'}</td>
+                                    <td>{position.market_value ? position.market_value.toLocaleString() : 'N/A'}</td>
+                                    <td>{position.currency || 'N/A'}</td>
+                                    <td>{instrument.issuer || 'N/A'}</td>
+                                    <td>{instrument.rating || 'N/A'}</td>
+                                    <td>{instrument.country || 'N/A'}</td>
+                                    <td>{instrument.issue_date || 'N/A'}</td>
+                                    <td>{instrument.maturity_date || 'N/A'}</td>
+                                    {portfolio.positions.some(p => p.instrument && p.instrument.sector) && 
+                                      <td>{instrument.sector || 'N/A'}</td>}
+                                    {portfolio.positions.some(p => p.instrument && p.instrument.coupon) && 
+                                      <td>{instrument.coupon ? instrument.coupon.toLocaleString() : 'N/A'}</td>}
+                                    {portfolio.positions.some(p => p.instrument && p.instrument.face_value) && 
+                                      <td>{instrument.face_value ? instrument.face_value.toLocaleString() : 'N/A'}</td>}
+                                    {portfolio.positions.some(p => p.instrument && p.instrument.exchange) && 
+                                      <td>{instrument.exchange || 'N/A'}</td>}
+                                  </tr>
+                                );
+                              })}
                             </tbody>
                           </table>
                         )}
@@ -384,14 +207,10 @@ function App() {
     <ApolloProvider client={client}>
       <div className="App">
         <header className="App-header">
-          <h1>Financial Search Application</h1>
+          <h1>Partner Portfolio Viewer</h1>
         </header>
         <main>
-          <PortfolioOverview />
-          <div className="search-section">
-            <InstrumentsSearch />
-            <PartnersSearch />
-          </div>
+          <PartnerPortfolioView />
         </main>
       </div>
     </ApolloProvider>

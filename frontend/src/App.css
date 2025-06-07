@@ -129,13 +129,48 @@ li:last-child {
   border-bottom: none;
 }
 
-/* Portfolio Overview Styles */
+/* Partner Portfolio View Styles */
+.partner-portfolio-view-container {
+  background-color: white;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+}
+
+/* Portfolio Overview Styles - kept for backward compatibility */
 .portfolio-overview-container {
   background-color: white;
   padding: 20px;
   border-radius: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 30px;
+}
+
+.partner-portfolio-content {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+}
+
+.partner-info {
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 5px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.partner-info h3 {
+  margin-top: 0;
+  color: #333;
+  border-bottom: 2px solid #4CAF50;
+  padding-bottom: 8px;
+}
+
+.partner-info p {
+  margin: 8px 0;
 }
 
 .portfolio-content {
@@ -232,17 +267,23 @@ li:last-child {
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
+  font-size: 14px;
+  overflow-x: auto;
+  display: block;
 }
 
 .positions-list th, .positions-list td {
   padding: 10px;
   text-align: left;
   border-bottom: 1px solid #ddd;
+  white-space: nowrap;
 }
 
 .positions-list th {
   background-color: #f2f2f2;
   font-weight: bold;
+  position: sticky;
+  top: 0;
 }
 
 .positions-list tr:hover {
@@ -252,4 +293,10 @@ li:last-child {
 .positions-list td p {
   margin: 5px 0;
   font-size: 14px;
+}
+
+/* Add horizontal scrolling for tables with many columns */
+.positions-list {
+  overflow-x: auto;
+  max-width: 100%;
 }
