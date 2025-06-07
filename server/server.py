@@ -125,6 +125,7 @@ type_defs = gql("""
         getPortfoliosByInstrument(instrument_id: ID!): [Portfolio!]!
         getUniqueCountryValues(field: String!, filter: String): [CountryValue!]!
         getInstrumentTypeCounts: [TypeCount!]!
+        getInstrumentIssuerCounts: [TypeCount!]!
     }
 """)
 
@@ -772,6 +773,48 @@ def resolve_instrument_type_counts(_, info):
 
 # Register the resolver for getInstrumentTypeCounts
 query.set_field("getInstrumentTypeCounts", resolve_instrument_type_counts)
+
+# Define resolver for getInstrumentIssuerCounts
+def resolve_instrument_issuer_counts(_, info):
+    """
+    Resolver for getInstrumentIssuerCounts query.
+    Returns counts of instruments by issuer.
+    """
+    try:
+        # Build the query
+        query_body = {
+            "size": 0,  # We only want aggregation results, not documents
+            "aggs": {
+                "issuer_counts": {
+                    "terms": {
+                        "field": "issuer",
+                        "size": 10  # Get up to 10 unique issuers
+                    }
+                }
+            }
+        }
+
+        # Execute the query
+        res = client.search(index="financial_instruments", body=query_body)
+
+        # Extract the buckets from the aggregation results
+        buckets = res["aggregations"]["issuer_counts"]["buckets"]
+
+        # Convert the buckets to the expected format
+        result = []
+        for bucket in buckets:
+            result.append({
+                "type": bucket["key"],  # Using "type" field to match TypeCount type
+                "count": bucket["doc_count"]
+            })
+
+        return result
+    except Exception as e:
+        print(f"Error retrieving instrument issuer counts: {e}")
+        return []
+
+# Register the resolver for getInstrumentIssuerCounts
+query.set_field("getInstrumentIssuerCounts", resolve_instrument_issuer_counts)
 
 # Define resolvers for the new fields
 from ariadne import ObjectType

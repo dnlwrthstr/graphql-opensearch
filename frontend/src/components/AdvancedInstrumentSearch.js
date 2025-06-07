@@ -11,6 +11,16 @@ const GET_INSTRUMENT_TYPE_COUNTS = gql`
   }
 `;
 
+// GraphQL query for getting instrument issuer counts
+const GET_INSTRUMENT_ISSUER_COUNTS = gql`
+  query GetInstrumentIssuerCounts {
+    getInstrumentIssuerCounts {
+      type
+      count
+    }
+  }
+`;
+
 // GraphQL query for searching instruments
 const SEARCH_INSTRUMENTS = gql`
   query SearchInstruments($query: String) {
@@ -93,6 +103,9 @@ function AdvancedInstrumentSearch() {
 
   // Query for instrument type counts
   const { data: typeCountsData } = useQuery(GET_INSTRUMENT_TYPE_COUNTS);
+
+  // Query for instrument issuer counts
+  const { data: issuerCountsData } = useQuery(GET_INSTRUMENT_ISSUER_COUNTS);
 
   // Query for search results
   const { loading, error, data } = useQuery(SEARCH_INSTRUMENTS, {
@@ -226,13 +239,27 @@ function AdvancedInstrumentSearch() {
                 onChange={handleInputChange}
               >
                 <option value="">Select...</option>
-                <option value="BlackRock">BlackRock</option>
-                <option value="Goldman Sachs">Goldman Sachs</option>
-                <option value="JP Morgan">JP Morgan</option>
-                <option value="Credit Suisse">Credit Suisse</option>
-                <option value="Deutsche Bank">Deutsche Bank</option>
-                <option value="UBS">UBS</option>
-                <option value="BNP Paribas">BNP Paribas</option>
+                <option value="BlackRock">
+                  BlackRock {issuerCountsData?.getInstrumentIssuerCounts?.find(i => i.type === 'BlackRock')?.count ? `(${issuerCountsData.getInstrumentIssuerCounts.find(i => i.type === 'BlackRock').count})` : ''}
+                </option>
+                <option value="Goldman Sachs">
+                  Goldman Sachs {issuerCountsData?.getInstrumentIssuerCounts?.find(i => i.type === 'Goldman Sachs')?.count ? `(${issuerCountsData.getInstrumentIssuerCounts.find(i => i.type === 'Goldman Sachs').count})` : ''}
+                </option>
+                <option value="JP Morgan">
+                  JP Morgan {issuerCountsData?.getInstrumentIssuerCounts?.find(i => i.type === 'JP Morgan')?.count ? `(${issuerCountsData.getInstrumentIssuerCounts.find(i => i.type === 'JP Morgan').count})` : ''}
+                </option>
+                <option value="Credit Suisse">
+                  Credit Suisse {issuerCountsData?.getInstrumentIssuerCounts?.find(i => i.type === 'Credit Suisse')?.count ? `(${issuerCountsData.getInstrumentIssuerCounts.find(i => i.type === 'Credit Suisse').count})` : ''}
+                </option>
+                <option value="Deutsche Bank">
+                  Deutsche Bank {issuerCountsData?.getInstrumentIssuerCounts?.find(i => i.type === 'Deutsche Bank')?.count ? `(${issuerCountsData.getInstrumentIssuerCounts.find(i => i.type === 'Deutsche Bank').count})` : ''}
+                </option>
+                <option value="UBS">
+                  UBS {issuerCountsData?.getInstrumentIssuerCounts?.find(i => i.type === 'UBS')?.count ? `(${issuerCountsData.getInstrumentIssuerCounts.find(i => i.type === 'UBS').count})` : ''}
+                </option>
+                <option value="BNP Paribas">
+                  BNP Paribas {issuerCountsData?.getInstrumentIssuerCounts?.find(i => i.type === 'BNP Paribas')?.count ? `(${issuerCountsData.getInstrumentIssuerCounts.find(i => i.type === 'BNP Paribas').count})` : ''}
+                </option>
               </select>
             </div>
 
