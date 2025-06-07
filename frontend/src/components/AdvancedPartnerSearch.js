@@ -263,7 +263,7 @@ function AdvancedPartnerSearch() {
 
       {data && data.searchPartners && (
         <div className="results">
-          <h3>Search Results</h3>
+          <h3>Search Results ({data.searchPartners.length} partners found)</h3>
           {data.searchPartners.length === 0 ? (
             <p>No partners found matching your criteria</p>
           ) : (
@@ -289,7 +289,7 @@ function AdvancedPartnerSearch() {
                     <tr key={partner.id}>
                       <td>{partner.name}</td>
                       <td>{partner.partner_type}</td>
-                      <td>{partner.legal_entity_type || '-'}</td>
+                      <td>{partner.partner_type === 'individual' ? 'Individual' : (partner.legal_entity_type || '-')}</td>
                       <td>{partner.residency_country}</td>
                       <td>{partner.nationality || '-'}</td>
                       <td>{partner.kyc_status}</td>
