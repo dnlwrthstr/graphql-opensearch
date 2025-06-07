@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { gql, useQuery, useLazyQuery } from '@apollo/client';
+import React, { useState } from 'react';
+import { gql, useQuery } from '@apollo/client';
 
 // GraphQL query for searching partners
 const SEARCH_PARTNERS = gql`
@@ -24,18 +24,6 @@ const SEARCH_PARTNERS = gql`
   }
 `;
 
-// GraphQL query for autocomplete
-const AUTOCOMPLETE_PARTNER_NAME = gql`
-  query AutocompletePartnerName($query: String!) {
-    autocompletePartnerName(query: $query) {
-      id
-      name
-      residency_country
-      nationality
-    }
-  }
-`;
-
 function AdvancedPartnerSearch() {
   const [searchParams, setSearchParams] = useState({
     name: '',
@@ -54,43 +42,11 @@ function AdvancedPartnerSearch() {
   const [executeQuery, setExecuteQuery] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchId, setSearchId] = useState(null);
-  const [suggestions, setSuggestions] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [lastSearched, setLastSearched] = useState('');
 
   const { loading, error, data } = useQuery(SEARCH_PARTNERS, {
     variables: { query: searchQuery, id: searchId },
     skip: !executeQuery
   });
-
-  // Lazy query for autocomplete
-  const [getAutocompleteSuggestions, { loading: autocompleteLoading, data: autocompleteData }] = useLazyQuery(
-    AUTOCOMPLETE_PARTNER_NAME,
-    {
-      fetchPolicy: 'network-only', // Don't cache results
-      onCompleted: (data) => {
-        if (data && data.autocompletePartnerName) {
-          setSuggestions(data.autocompletePartnerName);
-          setShowSuggestions(true);
-        }
-      }
-    }
-  );
-
-  // Debounce function for autocomplete
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (searchParams.name && searchParams.name.length >= 2 && searchParams.name !== lastSearched) {
-        getAutocompleteSuggestions({ variables: { query: searchParams.name } });
-        setLastSearched(searchParams.name);
-      } else if (!searchParams.name || searchParams.name.length < 2) {
-        setSuggestions([]);
-        setShowSuggestions(false);
-      }
-    }, 300); // 300ms debounce
-
-    return () => clearTimeout(timer);
-  }, [searchParams.name, getAutocompleteSuggestions, lastSearched]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -98,24 +54,6 @@ function AdvancedPartnerSearch() {
       ...searchParams,
       [name]: value
     });
-  };
-
-  const handleSuggestionClick = (suggestion) => {
-    // Only update name and partner_id from the suggestion
-    const updatedParams = {
-      ...searchParams,
-      name: suggestion.name,
-      partner_id: suggestion.id
-    };
-
-    setSearchParams(updatedParams);
-    setShowSuggestions(false);
-    setLastSearched(suggestion.name); // Update lastSearched to prevent dropdown from reopening
-
-    // Immediately execute search by ID only
-    setSearchQuery('');
-    setSearchId(suggestion.id);
-    setExecuteQuery(true);
   };
 
   const handleCheckboxChange = (e) => {
@@ -168,7 +106,6 @@ function AdvancedPartnerSearch() {
     setSearchQuery('');
     setSearchId(null);
     setExecuteQuery(false);
-    setLastSearched(''); // Reset lastSearched to ensure dropdown behavior is consistent
   };
 
   return (
@@ -178,36 +115,13 @@ function AdvancedPartnerSearch() {
         <div className="search-inputs">
           <div className="input-group">
             <label>Name:</label>
-            <div className="autocomplete-container">
-              <input
-                type="text"
-                name="name"
-                value={searchParams.name}
-                onChange={handleInputChange}
-                placeholder="Partner name..."
-                onFocus={() => searchParams.name.length >= 2 && searchParams.name !== lastSearched && setShowSuggestions(true)}
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-              />
-              {showSuggestions && suggestions.length > 0 && (
-                <div className="suggestions-dropdown">
-                  {suggestions.map((suggestion, index) => (
-                    <div 
-                      key={index} 
-                      className="suggestion-item"
-                      onClick={() => handleSuggestionClick(suggestion)}
-                    >
-                      <div className="suggestion-name">{suggestion.name}</div>
-                      <div className="suggestion-details">
-                        <span>ID: {suggestion.id}</span>
-                        {suggestion.residency_country && <span>Residence: {suggestion.residency_country}</span>}
-                        {suggestion.nationality && <span>Nationality: {suggestion.nationality}</span>}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-              {autocompleteLoading && <div className="loading-indicator">Loading suggestions...</div>}
-            </div>
+            <input
+              type="text"
+              name="name"
+              value={searchParams.name}
+              onChange={handleInputChange}
+              placeholder="Partner name (full text search)..."
+            />
           </div>
 
           <div className="input-group">
