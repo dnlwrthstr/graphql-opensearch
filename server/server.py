@@ -126,6 +126,10 @@ type_defs = gql("""
         getUniqueCountryValues(field: String!, filter: String): [CountryValue!]!
         getInstrumentTypeCounts: [TypeCount!]!
         getInstrumentIssuerCounts: [TypeCount!]!
+        getInstrumentCountryCounts: [TypeCount!]!
+        getInstrumentCurrencyCounts: [TypeCount!]!
+        getInstrumentExchangeCounts: [TypeCount!]!
+        getInstrumentSectorCounts: [TypeCount!]!
     }
 """)
 
@@ -815,6 +819,174 @@ def resolve_instrument_issuer_counts(_, info):
 
 # Register the resolver for getInstrumentIssuerCounts
 query.set_field("getInstrumentIssuerCounts", resolve_instrument_issuer_counts)
+
+# Define resolver for getInstrumentCountryCounts
+def resolve_instrument_country_counts(_, info):
+    """
+    Resolver for getInstrumentCountryCounts query.
+    Returns counts of instruments by country.
+    """
+    try:
+        # Build the query
+        query_body = {
+            "size": 0,  # We only want aggregation results, not documents
+            "aggs": {
+                "country_counts": {
+                    "terms": {
+                        "field": "country",
+                        "size": 10  # Get up to 10 unique countries
+                    }
+                }
+            }
+        }
+
+        # Execute the query
+        res = client.search(index="financial_instruments", body=query_body)
+
+        # Extract the buckets from the aggregation results
+        buckets = res["aggregations"]["country_counts"]["buckets"]
+
+        # Convert the buckets to the expected format
+        result = []
+        for bucket in buckets:
+            result.append({
+                "type": bucket["key"],  # Using "type" field to match TypeCount type
+                "count": bucket["doc_count"]
+            })
+
+        return result
+    except Exception as e:
+        print(f"Error retrieving instrument country counts: {e}")
+        return []
+
+# Register the resolver for getInstrumentCountryCounts
+query.set_field("getInstrumentCountryCounts", resolve_instrument_country_counts)
+
+# Define resolver for getInstrumentCurrencyCounts
+def resolve_instrument_currency_counts(_, info):
+    """
+    Resolver for getInstrumentCurrencyCounts query.
+    Returns counts of instruments by currency.
+    """
+    try:
+        # Build the query
+        query_body = {
+            "size": 0,  # We only want aggregation results, not documents
+            "aggs": {
+                "currency_counts": {
+                    "terms": {
+                        "field": "currency",
+                        "size": 10  # Get up to 10 unique currencies
+                    }
+                }
+            }
+        }
+
+        # Execute the query
+        res = client.search(index="financial_instruments", body=query_body)
+
+        # Extract the buckets from the aggregation results
+        buckets = res["aggregations"]["currency_counts"]["buckets"]
+
+        # Convert the buckets to the expected format
+        result = []
+        for bucket in buckets:
+            result.append({
+                "type": bucket["key"],  # Using "type" field to match TypeCount type
+                "count": bucket["doc_count"]
+            })
+
+        return result
+    except Exception as e:
+        print(f"Error retrieving instrument currency counts: {e}")
+        return []
+
+# Register the resolver for getInstrumentCurrencyCounts
+query.set_field("getInstrumentCurrencyCounts", resolve_instrument_currency_counts)
+
+# Define resolver for getInstrumentExchangeCounts
+def resolve_instrument_exchange_counts(_, info):
+    """
+    Resolver for getInstrumentExchangeCounts query.
+    Returns counts of instruments by exchange.
+    """
+    try:
+        # Build the query
+        query_body = {
+            "size": 0,  # We only want aggregation results, not documents
+            "aggs": {
+                "exchange_counts": {
+                    "terms": {
+                        "field": "exchange",
+                        "size": 10  # Get up to 10 unique exchanges
+                    }
+                }
+            }
+        }
+
+        # Execute the query
+        res = client.search(index="financial_instruments", body=query_body)
+
+        # Extract the buckets from the aggregation results
+        buckets = res["aggregations"]["exchange_counts"]["buckets"]
+
+        # Convert the buckets to the expected format
+        result = []
+        for bucket in buckets:
+            result.append({
+                "type": bucket["key"],  # Using "type" field to match TypeCount type
+                "count": bucket["doc_count"]
+            })
+
+        return result
+    except Exception as e:
+        print(f"Error retrieving instrument exchange counts: {e}")
+        return []
+
+# Register the resolver for getInstrumentExchangeCounts
+query.set_field("getInstrumentExchangeCounts", resolve_instrument_exchange_counts)
+
+# Define resolver for getInstrumentSectorCounts
+def resolve_instrument_sector_counts(_, info):
+    """
+    Resolver for getInstrumentSectorCounts query.
+    Returns counts of instruments by sector.
+    """
+    try:
+        # Build the query
+        query_body = {
+            "size": 0,  # We only want aggregation results, not documents
+            "aggs": {
+                "sector_counts": {
+                    "terms": {
+                        "field": "sector",
+                        "size": 10  # Get up to 10 unique sectors
+                    }
+                }
+            }
+        }
+
+        # Execute the query
+        res = client.search(index="financial_instruments", body=query_body)
+
+        # Extract the buckets from the aggregation results
+        buckets = res["aggregations"]["sector_counts"]["buckets"]
+
+        # Convert the buckets to the expected format
+        result = []
+        for bucket in buckets:
+            result.append({
+                "type": bucket["key"],  # Using "type" field to match TypeCount type
+                "count": bucket["doc_count"]
+            })
+
+        return result
+    except Exception as e:
+        print(f"Error retrieving instrument sector counts: {e}")
+        return []
+
+# Register the resolver for getInstrumentSectorCounts
+query.set_field("getInstrumentSectorCounts", resolve_instrument_sector_counts)
 
 # Define resolvers for the new fields
 from ariadne import ObjectType

@@ -21,6 +21,46 @@ const GET_INSTRUMENT_ISSUER_COUNTS = gql`
   }
 `;
 
+// GraphQL query for getting instrument country counts
+const GET_INSTRUMENT_COUNTRY_COUNTS = gql`
+  query GetInstrumentCountryCounts {
+    getInstrumentCountryCounts {
+      type
+      count
+    }
+  }
+`;
+
+// GraphQL query for getting instrument currency counts
+const GET_INSTRUMENT_CURRENCY_COUNTS = gql`
+  query GetInstrumentCurrencyCounts {
+    getInstrumentCurrencyCounts {
+      type
+      count
+    }
+  }
+`;
+
+// GraphQL query for getting instrument exchange counts
+const GET_INSTRUMENT_EXCHANGE_COUNTS = gql`
+  query GetInstrumentExchangeCounts {
+    getInstrumentExchangeCounts {
+      type
+      count
+    }
+  }
+`;
+
+// GraphQL query for getting instrument sector counts
+const GET_INSTRUMENT_SECTOR_COUNTS = gql`
+  query GetInstrumentSectorCounts {
+    getInstrumentSectorCounts {
+      type
+      count
+    }
+  }
+`;
+
 // GraphQL query for searching instruments
 const SEARCH_INSTRUMENTS = gql`
   query SearchInstruments($query: String) {
@@ -106,6 +146,18 @@ function AdvancedInstrumentSearch() {
 
   // Query for instrument issuer counts
   const { data: issuerCountsData } = useQuery(GET_INSTRUMENT_ISSUER_COUNTS);
+
+  // Query for instrument country counts
+  const { data: countryCountsData } = useQuery(GET_INSTRUMENT_COUNTRY_COUNTS);
+
+  // Query for instrument currency counts
+  const { data: currencyCountsData } = useQuery(GET_INSTRUMENT_CURRENCY_COUNTS);
+
+  // Query for instrument exchange counts
+  const { data: exchangeCountsData } = useQuery(GET_INSTRUMENT_EXCHANGE_COUNTS);
+
+  // Query for instrument sector counts
+  const { data: sectorCountsData } = useQuery(GET_INSTRUMENT_SECTOR_COUNTS);
 
   // Query for search results
   const { loading, error, data } = useQuery(SEARCH_INSTRUMENTS, {
@@ -271,11 +323,21 @@ function AdvancedInstrumentSearch() {
                 onChange={handleInputChange}
               >
                 <option value="">Select...</option>
-                <option value="USD">USD</option>
-                <option value="EUR">EUR</option>
-                <option value="GBP">GBP</option>
-                <option value="CHF">CHF</option>
-                <option value="JPY">JPY</option>
+                <option value="USD">
+                  USD {currencyCountsData?.getInstrumentCurrencyCounts?.find(c => c.type === 'USD')?.count ? `(${currencyCountsData.getInstrumentCurrencyCounts.find(c => c.type === 'USD').count})` : ''}
+                </option>
+                <option value="EUR">
+                  EUR {currencyCountsData?.getInstrumentCurrencyCounts?.find(c => c.type === 'EUR')?.count ? `(${currencyCountsData.getInstrumentCurrencyCounts.find(c => c.type === 'EUR').count})` : ''}
+                </option>
+                <option value="GBP">
+                  GBP {currencyCountsData?.getInstrumentCurrencyCounts?.find(c => c.type === 'GBP')?.count ? `(${currencyCountsData.getInstrumentCurrencyCounts.find(c => c.type === 'GBP').count})` : ''}
+                </option>
+                <option value="CHF">
+                  CHF {currencyCountsData?.getInstrumentCurrencyCounts?.find(c => c.type === 'CHF')?.count ? `(${currencyCountsData.getInstrumentCurrencyCounts.find(c => c.type === 'CHF').count})` : ''}
+                </option>
+                <option value="JPY">
+                  JPY {currencyCountsData?.getInstrumentCurrencyCounts?.find(c => c.type === 'JPY')?.count ? `(${currencyCountsData.getInstrumentCurrencyCounts.find(c => c.type === 'JPY').count})` : ''}
+                </option>
               </select>
             </div>
 
@@ -287,11 +349,21 @@ function AdvancedInstrumentSearch() {
                 onChange={handleInputChange}
               >
                 <option value="">Select...</option>
-                <option value="US">US</option>
-                <option value="UK">UK</option>
-                <option value="DE">DE</option>
-                <option value="CH">CH</option>
-                <option value="JP">JP</option>
+                <option value="US">
+                  US {countryCountsData?.getInstrumentCountryCounts?.find(c => c.type === 'US')?.count ? `(${countryCountsData.getInstrumentCountryCounts.find(c => c.type === 'US').count})` : ''}
+                </option>
+                <option value="UK">
+                  UK {countryCountsData?.getInstrumentCountryCounts?.find(c => c.type === 'UK')?.count ? `(${countryCountsData.getInstrumentCountryCounts.find(c => c.type === 'UK').count})` : ''}
+                </option>
+                <option value="DE">
+                  DE {countryCountsData?.getInstrumentCountryCounts?.find(c => c.type === 'DE')?.count ? `(${countryCountsData.getInstrumentCountryCounts.find(c => c.type === 'DE').count})` : ''}
+                </option>
+                <option value="CH">
+                  CH {countryCountsData?.getInstrumentCountryCounts?.find(c => c.type === 'CH')?.count ? `(${countryCountsData.getInstrumentCountryCounts.find(c => c.type === 'CH').count})` : ''}
+                </option>
+                <option value="JP">
+                  JP {countryCountsData?.getInstrumentCountryCounts?.find(c => c.type === 'JP')?.count ? `(${countryCountsData.getInstrumentCountryCounts.find(c => c.type === 'JP').count})` : ''}
+                </option>
               </select>
             </div>
           </div>
@@ -329,11 +401,21 @@ function AdvancedInstrumentSearch() {
                     onChange={handleInputChange}
                   >
                     <option value="">Select...</option>
-                    <option value="NYSE">NYSE</option>
-                    <option value="NASDAQ">NASDAQ</option>
-                    <option value="LSE">LSE</option>
-                    <option value="TSE">TSE</option>
-                    <option value="SIX">SIX</option>
+                    <option value="NYSE">
+                      NYSE {exchangeCountsData?.getInstrumentExchangeCounts?.find(e => e.type === 'NYSE')?.count ? `(${exchangeCountsData.getInstrumentExchangeCounts.find(e => e.type === 'NYSE').count})` : ''}
+                    </option>
+                    <option value="NASDAQ">
+                      NASDAQ {exchangeCountsData?.getInstrumentExchangeCounts?.find(e => e.type === 'NASDAQ')?.count ? `(${exchangeCountsData.getInstrumentExchangeCounts.find(e => e.type === 'NASDAQ').count})` : ''}
+                    </option>
+                    <option value="LSE">
+                      LSE {exchangeCountsData?.getInstrumentExchangeCounts?.find(e => e.type === 'LSE')?.count ? `(${exchangeCountsData.getInstrumentExchangeCounts.find(e => e.type === 'LSE').count})` : ''}
+                    </option>
+                    <option value="TSE">
+                      TSE {exchangeCountsData?.getInstrumentExchangeCounts?.find(e => e.type === 'TSE')?.count ? `(${exchangeCountsData.getInstrumentExchangeCounts.find(e => e.type === 'TSE').count})` : ''}
+                    </option>
+                    <option value="SIX">
+                      SIX {exchangeCountsData?.getInstrumentExchangeCounts?.find(e => e.type === 'SIX')?.count ? `(${exchangeCountsData.getInstrumentExchangeCounts.find(e => e.type === 'SIX').count})` : ''}
+                    </option>
                   </select>
                 </div>
 
@@ -345,11 +427,21 @@ function AdvancedInstrumentSearch() {
                     onChange={handleInputChange}
                   >
                     <option value="">Select...</option>
-                    <option value="Technology">Technology</option>
-                    <option value="Finance">Finance</option>
-                    <option value="Healthcare">Healthcare</option>
-                    <option value="Energy">Energy</option>
-                    <option value="Retail">Retail</option>
+                    <option value="Technology">
+                      Technology {sectorCountsData?.getInstrumentSectorCounts?.find(s => s.type === 'Technology')?.count ? `(${sectorCountsData.getInstrumentSectorCounts.find(s => s.type === 'Technology').count})` : ''}
+                    </option>
+                    <option value="Finance">
+                      Finance {sectorCountsData?.getInstrumentSectorCounts?.find(s => s.type === 'Finance')?.count ? `(${sectorCountsData.getInstrumentSectorCounts.find(s => s.type === 'Finance').count})` : ''}
+                    </option>
+                    <option value="Healthcare">
+                      Healthcare {sectorCountsData?.getInstrumentSectorCounts?.find(s => s.type === 'Healthcare')?.count ? `(${sectorCountsData.getInstrumentSectorCounts.find(s => s.type === 'Healthcare').count})` : ''}
+                    </option>
+                    <option value="Energy">
+                      Energy {sectorCountsData?.getInstrumentSectorCounts?.find(s => s.type === 'Energy')?.count ? `(${sectorCountsData.getInstrumentSectorCounts.find(s => s.type === 'Energy').count})` : ''}
+                    </option>
+                    <option value="Retail">
+                      Retail {sectorCountsData?.getInstrumentSectorCounts?.find(s => s.type === 'Retail')?.count ? `(${sectorCountsData.getInstrumentSectorCounts.find(s => s.type === 'Retail').count})` : ''}
+                    </option>
                   </select>
                 </div>
               </>
