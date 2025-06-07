@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { gql, useQuery } from '@apollo/client';
 
 // GraphQL query for searching instruments
@@ -51,6 +51,35 @@ function AdvancedInstrumentSearch() {
 
   const [executeQuery, setExecuteQuery] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [visibleFields, setVisibleFields] = useState({
+    common: true,
+    bond: true,
+    share: true,
+    etf: true,
+    structured_product: true
+  });
+
+  // Update visible fields when type changes
+  useEffect(() => {
+    if (searchParams.type) {
+      setVisibleFields({
+        common: true,
+        bond: searchParams.type === 'bond',
+        share: searchParams.type === 'share',
+        etf: searchParams.type === 'etf',
+        structured_product: searchParams.type === 'structured_product'
+      });
+    } else {
+      // If no type is selected, show all fields
+      setVisibleFields({
+        common: true,
+        bond: true,
+        share: true,
+        etf: true,
+        structured_product: true
+      });
+    }
+  }, [searchParams.type]);
 
   // Query for search results
   const { loading, error, data } = useQuery(SEARCH_INSTRUMENTS, {
@@ -105,6 +134,14 @@ function AdvancedInstrumentSearch() {
     });
     setSearchQuery('');
     setExecuteQuery(false);
+    // Reset visible fields to show all
+    setVisibleFields({
+      common: true,
+      bond: true,
+      share: true,
+      etf: true,
+      structured_product: true
+    });
   };
 
   // Format date for display
@@ -211,7 +248,7 @@ function AdvancedInstrumentSearch() {
             </div>
           </div>
 
-          {/* Third row: rating, exchange, sector */}
+          {/* Third row: rating and share-specific fields (exchange, sector) */}
           <div className="search-row">
             <div className="input-group">
               <label>Rating:</label>
@@ -234,120 +271,130 @@ function AdvancedInstrumentSearch() {
               </select>
             </div>
 
-            <div className="input-group">
-              <label>Exchange:</label>
-              <select
-                name="exchange"
-                value={searchParams.exchange}
-                onChange={handleInputChange}
-              >
-                <option value="">Select...</option>
-                <option value="NYSE">NYSE</option>
-                <option value="NASDAQ">NASDAQ</option>
-                <option value="LSE">LSE</option>
-                <option value="TSE">TSE</option>
-                <option value="SIX">SIX</option>
-              </select>
-            </div>
+            {visibleFields.share && (
+              <>
+                <div className="input-group">
+                  <label>Exchange:</label>
+                  <select
+                    name="exchange"
+                    value={searchParams.exchange}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Select...</option>
+                    <option value="NYSE">NYSE</option>
+                    <option value="NASDAQ">NASDAQ</option>
+                    <option value="LSE">LSE</option>
+                    <option value="TSE">TSE</option>
+                    <option value="SIX">SIX</option>
+                  </select>
+                </div>
 
-            <div className="input-group">
-              <label>Sector:</label>
-              <select
-                name="sector"
-                value={searchParams.sector}
-                onChange={handleInputChange}
-              >
-                <option value="">Select...</option>
-                <option value="Technology">Technology</option>
-                <option value="Finance">Finance</option>
-                <option value="Healthcare">Healthcare</option>
-                <option value="Energy">Energy</option>
-                <option value="Retail">Retail</option>
-              </select>
-            </div>
+                <div className="input-group">
+                  <label>Sector:</label>
+                  <select
+                    name="sector"
+                    value={searchParams.sector}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Select...</option>
+                    <option value="Technology">Technology</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Healthcare">Healthcare</option>
+                    <option value="Energy">Energy</option>
+                    <option value="Retail">Retail</option>
+                  </select>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Fourth row: Bond specific fields */}
-          <div className="search-row">
-            <div className="input-group">
-              <label>Coupon (%):</label>
-              <input
-                type="text"
-                name="coupon"
-                value={searchParams.coupon}
-                onChange={handleInputChange}
-                placeholder="Bond coupon rate..."
-              />
-            </div>
+          {visibleFields.bond && (
+            <div className="search-row">
+              <div className="input-group">
+                <label>Coupon (%):</label>
+                <input
+                  type="text"
+                  name="coupon"
+                  value={searchParams.coupon}
+                  onChange={handleInputChange}
+                  placeholder="Bond coupon rate..."
+                />
+              </div>
 
-            <div className="input-group">
-              <label>Face Value:</label>
-              <input
-                type="text"
-                name="face_value"
-                value={searchParams.face_value}
-                onChange={handleInputChange}
-                placeholder="Bond face value..."
-              />
+              <div className="input-group">
+                <label>Face Value:</label>
+                <input
+                  type="text"
+                  name="face_value"
+                  value={searchParams.face_value}
+                  onChange={handleInputChange}
+                  placeholder="Bond face value..."
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Fifth row: ETF specific fields */}
-          <div className="search-row">
-            <div className="input-group">
-              <label>Index Tracked:</label>
-              <select
-                name="index_tracked"
-                value={searchParams.index_tracked}
-                onChange={handleInputChange}
-              >
-                <option value="">Select...</option>
-                <option value="S&P 500">S&P 500</option>
-                <option value="NASDAQ 100">NASDAQ 100</option>
-                <option value="DAX">DAX</option>
-                <option value="Nikkei 225">Nikkei 225</option>
-                <option value="SMI">SMI</option>
-              </select>
-            </div>
+          {visibleFields.etf && (
+            <div className="search-row">
+              <div className="input-group">
+                <label>Index Tracked:</label>
+                <select
+                  name="index_tracked"
+                  value={searchParams.index_tracked}
+                  onChange={handleInputChange}
+                >
+                  <option value="">Select...</option>
+                  <option value="S&P 500">S&P 500</option>
+                  <option value="NASDAQ 100">NASDAQ 100</option>
+                  <option value="DAX">DAX</option>
+                  <option value="Nikkei 225">Nikkei 225</option>
+                  <option value="SMI">SMI</option>
+                </select>
+              </div>
 
-            <div className="input-group">
-              <label>Total Expense Ratio:</label>
-              <input
-                type="text"
-                name="total_expense_ratio"
-                value={searchParams.total_expense_ratio}
-                onChange={handleInputChange}
-                placeholder="ETF expense ratio..."
-              />
+              <div className="input-group">
+                <label>Total Expense Ratio:</label>
+                <input
+                  type="text"
+                  name="total_expense_ratio"
+                  value={searchParams.total_expense_ratio}
+                  onChange={handleInputChange}
+                  placeholder="ETF expense ratio..."
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Sixth row: Structured Product specific fields */}
-          <div className="search-row">
-            <div className="input-group">
-              <label>Barrier Level (%):</label>
-              <input
-                type="text"
-                name="barrier_level"
-                value={searchParams.barrier_level}
-                onChange={handleInputChange}
-                placeholder="Structured product barrier level..."
-              />
-            </div>
+          {visibleFields.structured_product && (
+            <div className="search-row">
+              <div className="input-group">
+                <label>Barrier Level (%):</label>
+                <input
+                  type="text"
+                  name="barrier_level"
+                  value={searchParams.barrier_level}
+                  onChange={handleInputChange}
+                  placeholder="Structured product barrier level..."
+                />
+              </div>
 
-            <div className="input-group">
-              <label>Capital Protection:</label>
-              <select
-                name="capital_protection"
-                value={searchParams.capital_protection}
-                onChange={handleInputChange}
-              >
-                <option value="">Select...</option>
-                <option value="true">Yes</option>
-                <option value="false">No</option>
-              </select>
+              <div className="input-group">
+                <label>Capital Protection:</label>
+                <select
+                  name="capital_protection"
+                  value={searchParams.capital_protection}
+                  onChange={handleInputChange}
+                >
+                  <option value="">Select...</option>
+                  <option value="true">Yes</option>
+                  <option value="false">No</option>
+                </select>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         <div className="button-group">

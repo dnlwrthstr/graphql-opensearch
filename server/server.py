@@ -266,7 +266,7 @@ def resolve_search_financial_instruments(_, info, query=None, id=None):
             search_query = {"multi_match": {"query": query, "fields": ["name", "issuer", "type", "isin", "currency", "country"]}}
 
     print(f"Final search query: {search_query}")
-    res = client.search(index="financial_instruments", body={"query": search_query})
+    res = client.search(index="financial_instruments", body={"query": search_query, "size": 10000})
 
     # Return results with _id included
     return [{"id": hit["_id"], **hit["_source"]} for hit in res["hits"]["hits"]]
