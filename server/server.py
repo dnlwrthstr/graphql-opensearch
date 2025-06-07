@@ -121,17 +121,19 @@ query = QueryType()
 
 @query.field("searchPartners")
 def resolve_search_partners(_, info, query=None, id=None):
+    # If both query and id are None, retrieve all partners
     if query is None and id is None:
-        raise ValueError("Either query or id must be provided")
-
-    if id is not None:
+        # Use match_all query to retrieve all partners
+        search_query = {"match_all": {}}
+    elif id is not None:
         # Search by ID
         search_query = {"term": {"id": id}}
     else:
         # Search by query string
         search_query = {"multi_match": {"query": query, "fields": ["name", "partner_type", "residency_country", "nationality"]}}
 
-    res = client.search(index="partners", body={"query": search_query})
+    # Add size parameter to retrieve up to 10000 partners
+    res = client.search(index="partners", body={"query": search_query, "size": 10000})
 
     # Return results with _id included
     return [{"id": hit["_id"], **hit["_source"]} for hit in res["hits"]["hits"]]

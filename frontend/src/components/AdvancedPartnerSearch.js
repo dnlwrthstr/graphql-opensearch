@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { gql, useQuery } from '@apollo/client';
 
 // GraphQL query for searching partners
@@ -39,7 +39,7 @@ function AdvancedPartnerSearch() {
     sanctions_screened: ''
   });
 
-  const [executeQuery, setExecuteQuery] = useState(false);
+  const [executeQuery, setExecuteQuery] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchId, setSearchId] = useState(null);
 
@@ -47,6 +47,12 @@ function AdvancedPartnerSearch() {
     variables: { query: searchQuery, id: searchId },
     skip: !executeQuery
   });
+
+  // Load all partners when component mounts
+  useEffect(() => {
+    // Initial query will use null for both query and id, which will retrieve all partners
+    setExecuteQuery(true);
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -267,26 +273,46 @@ function AdvancedPartnerSearch() {
           {data.searchPartners.length === 0 ? (
             <p>No partners found matching your criteria</p>
           ) : (
-            <ul>
-              {data.searchPartners.map(partner => (
-                <li key={partner.id}>
-                  <h4>{partner.name}</h4>
-                  <p>ID: {partner.id}</p>
-                  <p>Type: {partner.partner_type}</p>
-                  {partner.birth_date && <p>Birth Date: {partner.birth_date}</p>}
-                  {partner.incorporation_date && <p>Incorporation Date: {partner.incorporation_date}</p>}
-                  <p>Residency: {partner.residency_country}</p>
-                  {partner.nationality && <p>Nationality: {partner.nationality}</p>}
-                  {partner.legal_entity_type && <p>Legal Entity Type: {partner.legal_entity_type}</p>}
-                  <p>KYC Status: {partner.kyc_status}</p>
-                  <p>Risk Level: {partner.risk_level}</p>
-                  <p>Account Type: {partner.account_type}</p>
-                  <p>PEP Flag: {partner.pep_flag ? 'Yes' : 'No'}</p>
-                  <p>Sanctions Screened: {partner.sanctions_screened ? 'Yes' : 'No'}</p>
-                  <p>Created: {partner.created_at}</p>
-                </li>
-              ))}
-            </ul>
+            <div className="partner-results-table-container">
+              <table className="partner-results-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Legal Entity Type</th>
+                    <th>Residence</th>
+                    <th>Nationality</th>
+                    <th>KYC Status</th>
+                    <th>Risk Level</th>
+                    <th>Account Type</th>
+                    <th>PEP Flag</th>
+                    <th>Sanctions Screened</th>
+                    <th>Incorporation Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.searchPartners.map(partner => (
+                    <tr key={partner.id}>
+                      <td>{partner.name}</td>
+                      <td>{partner.partner_type}</td>
+                      <td>{partner.legal_entity_type || '-'}</td>
+                      <td>{partner.residency_country}</td>
+                      <td>{partner.nationality || '-'}</td>
+                      <td>{partner.kyc_status}</td>
+                      <td>{partner.risk_level}</td>
+                      <td>{partner.account_type}</td>
+                      <td className={partner.pep_flag ? 'yes-value' : 'no-value'}>
+                        {partner.pep_flag ? 'Yes' : 'No'}
+                      </td>
+                      <td className={partner.sanctions_screened ? 'yes-value' : 'no-value'}>
+                        {partner.sanctions_screened ? 'Yes' : 'No'}
+                      </td>
+                      <td>{partner.incorporation_date || (partner.birth_date || '-')}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       )}

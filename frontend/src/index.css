@@ -12,3 +12,46 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Partner search results table styles */
+.partner-results-table-container {
+  max-height: 600px;
+  overflow-y: auto;
+  margin-top: 20px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.partner-results-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+}
+
+.partner-results-table th {
+  position: sticky;
+  top: 0;
+  background-color: #f8f8f8;
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 2px solid #ddd;
+  font-weight: 600;
+}
+
+.partner-results-table td {
+  padding: 10px 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.partner-results-table tr:hover {
+  background-color: #f5f5f5;
+}
+
+.partner-results-table .yes-value {
+  color: green;
+  font-weight: 500;
+}
+
+.partner-results-table .no-value {
+  color: #999;
+}
