@@ -15,6 +15,27 @@ def seed_portfolios():
         client.indices.delete(index="portfolios")
         print("Deleted existing portfolios index")
 
+    # Create mapping with positions as a nested type
+    mapping = {
+        "mappings": {
+            "properties": {
+                "positions": {
+                    "type": "nested",
+                    "properties": {
+                        "instrument_id": { "type": "keyword" },
+                        "quantity": { "type": "float" },
+                        "market_value": { "type": "float" },
+                        "currency": { "type": "keyword" }
+                    }
+                }
+            }
+        }
+    }
+
+    # Create index with mapping
+    client.indices.create(index="portfolios", body=mapping)
+    print("Created portfolios index with nested positions mapping")
+
     # Load portfolios data
     portfolios = load_ndjson(data_path)
     print(f"Loaded {len(portfolios)} portfolios")

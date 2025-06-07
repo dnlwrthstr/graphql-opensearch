@@ -6,29 +6,40 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Import all test modules
-from test.test_search_partners import TestSearchPartners
-from test.test_search_portfolios import TestSearchPortfolios
-from test.test_search_financial_instruments import TestSearchFinancialInstruments
-from test.test_autocomplete_partner_name import TestAutocompletePartnerName
-from test.test_autocomplete_instrument_name import TestAutocompleteInstrumentName
-from test.test_get_portfolios_by_instrument import TestGetPortfoliosByInstrument
+from graphql_tests.test_search_partners import TestSearchPartners
+from graphql_tests.test_search_portfolios import TestSearchPortfolios
+from graphql_tests.test_search_financial_instruments import TestSearchFinancialInstruments
+from graphql_tests.test_autocomplete_partner_name import TestAutocompletePartnerName
+from graphql_tests.test_autocomplete_instrument_name import TestAutocompleteInstrumentName
+from graphql_tests.test_get_portfolios_by_instrument import TestGetPortfoliosByInstrument
+
+# Import OpenSearch test modules
+from opensearch.test_partners_index import TestPartnersIndex
+from opensearch.test_portfolios_index import TestPortfoliosIndex
+from opensearch.test_financial_instruments_index import TestFinancialInstrumentsIndex
 
 def run_tests():
     # Create a test suite
     test_suite = unittest.TestSuite()
-    
-    # Add test cases to the suite
-    test_suite.addTest(unittest.makeSuite(TestSearchPartners))
-    test_suite.addTest(unittest.makeSuite(TestSearchPortfolios))
-    test_suite.addTest(unittest.makeSuite(TestSearchFinancialInstruments))
-    test_suite.addTest(unittest.makeSuite(TestAutocompletePartnerName))
-    test_suite.addTest(unittest.makeSuite(TestAutocompleteInstrumentName))
-    test_suite.addTest(unittest.makeSuite(TestGetPortfoliosByInstrument))
-    
+    loader = unittest.TestLoader()
+
+    # Add GraphQL test cases to the suite
+    test_suite.addTest(loader.loadTestsFromTestCase(TestSearchPartners))
+    test_suite.addTest(loader.loadTestsFromTestCase(TestSearchPortfolios))
+    test_suite.addTest(loader.loadTestsFromTestCase(TestSearchFinancialInstruments))
+    test_suite.addTest(loader.loadTestsFromTestCase(TestAutocompletePartnerName))
+    test_suite.addTest(loader.loadTestsFromTestCase(TestAutocompleteInstrumentName))
+    test_suite.addTest(loader.loadTestsFromTestCase(TestGetPortfoliosByInstrument))
+
+    # Add OpenSearch test cases to the suite
+    test_suite.addTest(loader.loadTestsFromTestCase(TestPartnersIndex))
+    test_suite.addTest(loader.loadTestsFromTestCase(TestPortfoliosIndex))
+    test_suite.addTest(loader.loadTestsFromTestCase(TestFinancialInstrumentsIndex))
+
     # Run the tests
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(test_suite)
-    
+
     return result.wasSuccessful()
 
 if __name__ == '__main__':
