@@ -23,9 +23,6 @@ function App() {
     <ApolloProvider client={client}>
       <Router>
         <div className="App">
-          <header className="App-header">
-            <h1>Financial Data Explorer</h1>
-          </header>
           <Navigation />
           <main>
             <Routes>
