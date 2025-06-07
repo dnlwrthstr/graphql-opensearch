@@ -108,6 +108,11 @@ type_defs = gql("""
         count: Int!
     }
 
+    type TypeCount {
+        type: String!
+        count: Int!
+    }
+
     type Query {
         getPartner(id: ID!): Partner
         getPortfolio(id: ID!): Portfolio
@@ -119,6 +124,7 @@ type_defs = gql("""
         autocompleteInstrumentName(query: String!): [InstrumentSuggestion!]!
         getPortfoliosByInstrument(instrument_id: ID!): [Portfolio!]!
         getUniqueCountryValues(field: String!, filter: String): [CountryValue!]!
+        getInstrumentTypeCounts: [TypeCount!]!
     }
 """)
 
@@ -724,6 +730,48 @@ def resolve_unique_country_values(_, info, field, filter=None):
 
 # Register the resolver for getUniqueCountryValues
 query.set_field("getUniqueCountryValues", resolve_unique_country_values)
+
+# Define resolver for getInstrumentTypeCounts
+def resolve_instrument_type_counts(_, info):
+    """
+    Resolver for getInstrumentTypeCounts query.
+    Returns counts of instruments by type.
+    """
+    try:
+        # Build the query
+        query_body = {
+            "size": 0,  # We only want aggregation results, not documents
+            "aggs": {
+                "type_counts": {
+                    "terms": {
+                        "field": "type",
+                        "size": 10  # Get up to 10 unique types
+                    }
+                }
+            }
+        }
+
+        # Execute the query
+        res = client.search(index="financial_instruments", body=query_body)
+
+        # Extract the buckets from the aggregation results
+        buckets = res["aggregations"]["type_counts"]["buckets"]
+
+        # Convert the buckets to the expected format
+        result = []
+        for bucket in buckets:
+            result.append({
+                "type": bucket["key"],
+                "count": bucket["doc_count"]
+            })
+
+        return result
+    except Exception as e:
+        print(f"Error retrieving instrument type counts: {e}")
+        return []
+
+# Register the resolver for getInstrumentTypeCounts
+query.set_field("getInstrumentTypeCounts", resolve_instrument_type_counts)
 
 # Define resolvers for the new fields
 from ariadne import ObjectType

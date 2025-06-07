@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { gql, useQuery } from '@apollo/client';
 
+// GraphQL query for getting instrument type counts
+const GET_INSTRUMENT_TYPE_COUNTS = gql`
+  query GetInstrumentTypeCounts {
+    getInstrumentTypeCounts {
+      type
+      count
+    }
+  }
+`;
+
 // GraphQL query for searching instruments
 const SEARCH_INSTRUMENTS = gql`
   query SearchInstruments($query: String) {
@@ -80,6 +90,9 @@ function AdvancedInstrumentSearch() {
       });
     }
   }, [searchParams.type]);
+
+  // Query for instrument type counts
+  const { data: typeCountsData } = useQuery(GET_INSTRUMENT_TYPE_COUNTS);
 
   // Query for search results
   const { loading, error, data } = useQuery(SEARCH_INSTRUMENTS, {
@@ -187,10 +200,18 @@ function AdvancedInstrumentSearch() {
                 onChange={handleInputChange}
               >
                 <option value="">Select...</option>
-                <option value="bond">Bond</option>
-                <option value="share">Share</option>
-                <option value="etf">ETF</option>
-                <option value="structured_product">Structured Product</option>
+                <option value="bond">
+                  Bond {typeCountsData?.getInstrumentTypeCounts?.find(t => t.type === 'bond')?.count ? `(${typeCountsData.getInstrumentTypeCounts.find(t => t.type === 'bond').count})` : ''}
+                </option>
+                <option value="share">
+                  Share {typeCountsData?.getInstrumentTypeCounts?.find(t => t.type === 'share')?.count ? `(${typeCountsData.getInstrumentTypeCounts.find(t => t.type === 'share').count})` : ''}
+                </option>
+                <option value="etf">
+                  ETF {typeCountsData?.getInstrumentTypeCounts?.find(t => t.type === 'etf')?.count ? `(${typeCountsData.getInstrumentTypeCounts.find(t => t.type === 'etf').count})` : ''}
+                </option>
+                <option value="structured_product">
+                  Structured Product {typeCountsData?.getInstrumentTypeCounts?.find(t => t.type === 'structured_product')?.count ? `(${typeCountsData.getInstrumentTypeCounts.find(t => t.type === 'structured_product').count})` : ''}
+                </option>
               </select>
             </div>
           </div>
