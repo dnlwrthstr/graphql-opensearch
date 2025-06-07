@@ -129,6 +129,7 @@ function SimpleInstrumentSearch() {
                   >
                     <div className="suggestion-name">{suggestion.name}</div>
                     <div className="suggestion-details">
+                      <span>ID: {suggestion.id}</span>
                       <span>ISIN: {suggestion.isin}</span>
                       {suggestion.type && <span>Type: {suggestion.type}</span>}
                       {suggestion.currency && <span>Currency: {suggestion.currency}</span>}

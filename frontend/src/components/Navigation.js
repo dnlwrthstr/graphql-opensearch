@@ -39,6 +39,14 @@ function Navigation() {
             Simple Instrument Search
           </NavLink>
         </li>
+        <li>
+          <NavLink 
+            to="/portfolios-with-instrument" 
+            className={({ isActive }) => isActive ? "active-nav-link" : "nav-link"}
+          >
+            Portfolios with Instrument
+          </NavLink>
+        </li>
       </ul>
     </nav>
   );

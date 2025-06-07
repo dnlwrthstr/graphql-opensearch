@@ -230,6 +230,39 @@ query {
 }
 ```
 
+#### Get Portfolios Containing a Specific Instrument
+
+This query allows you to find all portfolios that contain a specific financial instrument. You can use the instrument's ID directly, or the API will attempt to find the instrument by ISIN or name if you provide a non-ID value.
+
+```graphql
+query {
+  getPortfoliosByInstrument(instrument_id: "inst-34") {
+    id
+    name
+    currency
+    created_at
+    positions {
+      instrument_id
+      quantity
+      market_value
+      currency
+      instrument {
+        id
+        name
+        isin
+        type
+      }
+    }
+    partner {
+      id
+      name
+      partner_type
+      residency_country
+    }
+  }
+}
+```
+
 ## API Reference
 
 ### Types
