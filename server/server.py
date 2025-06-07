@@ -202,13 +202,125 @@ def resolve_search_financial_instruments(_, info, query=None, id=None):
         # Search by ID
         search_query = {"term": {"id": id}}
     else:
-        # Search by query string
-        search_query = {"multi_match": {"query": query, "fields": ["name", "issuer", "type", "isin", "currency", "country"]}}
+        # Check if this is an advanced search query with field:value format
+        if ":" in query and (" AND " in query or " OR " in query or " NOT " in query):
+            # This is an advanced search query
+            print(f"Processing advanced search query: {query}")
 
+            # Parse the query into field:value pairs
+            bool_query = {"bool": {"must": [], "should": [], "must_not": []}}
+
+            # Split by AND, OR, NOT operators
+            current_operator = "AND"  # Default operator
+            current_clause = []
+
+            # First, split by spaces to separate operators and field:value pairs
+            tokens = query.split()
+            i = 0
+            while i < len(tokens):
+                token = tokens[i]
+
+                if token == "AND":
+                    # Process the current clause with the current operator
+                    if current_clause:
+                        process_clause(current_clause, current_operator, bool_query)
+                        current_clause = []
+                    current_operator = "AND"
+                elif token == "OR":
+                    # Process the current clause with the current operator
+                    if current_clause:
+                        process_clause(current_clause, current_operator, bool_query)
+                        current_clause = []
+                    current_operator = "OR"
+                elif token == "NOT":
+                    # Process the current clause with the current operator
+                    if current_clause:
+                        process_clause(current_clause, current_operator, bool_query)
+                        current_clause = []
+                    current_operator = "NOT"
+                else:
+                    # This is a field:value pair or part of one
+                    current_clause.append(token)
+
+                i += 1
+
+            # Process any remaining clause
+            if current_clause:
+                process_clause(current_clause, current_operator, bool_query)
+
+            # If there are no must, should, or must_not clauses, add a match_all query
+            if not bool_query["bool"]["must"] and not bool_query["bool"]["should"] and not bool_query["bool"]["must_not"]:
+                search_query = {"match_all": {}}
+            else:
+                # Remove empty clauses
+                if not bool_query["bool"]["must"]:
+                    del bool_query["bool"]["must"]
+                if not bool_query["bool"]["should"]:
+                    del bool_query["bool"]["should"]
+                if not bool_query["bool"]["must_not"]:
+                    del bool_query["bool"]["must_not"]
+
+                search_query = bool_query
+        else:
+            # Simple search by query string
+            search_query = {"multi_match": {"query": query, "fields": ["name", "issuer", "type", "isin", "currency", "country"]}}
+
+    print(f"Final search query: {search_query}")
     res = client.search(index="financial_instruments", body={"query": search_query})
 
     # Return results with _id included
     return [{"id": hit["_id"], **hit["_source"]} for hit in res["hits"]["hits"]]
+
+def process_clause(clause, operator, bool_query):
+    """Process a clause (field:value) with the given operator and add it to the bool query."""
+    # Join the tokens back into a string
+    clause_str = " ".join(clause)
+
+    # Split by : to get field and value
+    if ":" in clause_str:
+        field, value = clause_str.split(":", 1)
+
+        # Handle wildcards
+        if "*" in value or "?" in value:
+            query_type = "wildcard"
+        elif field in ["coupon", "face_value", "total_expense_ratio", "barrier_level"]:
+            query_type = "term"
+            try:
+                value = float(value)
+            except ValueError:
+                # If not a valid float, use match instead
+                query_type = "match"
+        elif field == "capital_protection":
+            query_type = "term"
+            value = value.lower() == "true"
+        else:
+            query_type = "match"
+
+        # Create the query based on the field and value
+        if query_type == "wildcard":
+            field_query = {"wildcard": {field: value}}
+        elif query_type == "term":
+            field_query = {"term": {field: value}}
+        else:  # match
+            field_query = {"match": {field: value}}
+
+        # Add the query to the appropriate clause based on the operator
+        if operator == "AND":
+            bool_query["bool"]["must"].append(field_query)
+        elif operator == "OR":
+            bool_query["bool"]["should"].append(field_query)
+        elif operator == "NOT":
+            bool_query["bool"]["must_not"].append(field_query)
+    else:
+        # If there's no field:value format, treat it as a general search
+        general_query = {"multi_match": {"query": clause_str, "fields": ["name", "issuer", "type", "isin", "currency", "country"]}}
+
+        if operator == "AND":
+            bool_query["bool"]["must"].append(general_query)
+        elif operator == "OR":
+            bool_query["bool"]["should"].append(general_query)
+        elif operator == "NOT":
+            bool_query["bool"]["must_not"].append(general_query)
 
 # Define the resolver function
 def resolve_get_partner(_, info, id):

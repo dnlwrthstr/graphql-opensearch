@@ -94,9 +94,12 @@ function Navigation() {
                 </NavLink>
               </li>
               <li>
-                <span className="nav-link coming-soon">
-                  Advanced Search (Coming Soon)
-                </span>
+                <NavLink 
+                  to="/advanced-instrument-search" 
+                  className={({ isActive }) => isActive ? "active-nav-link" : "nav-link"}
+                >
+                  Advanced Search
+                </NavLink>
               </li>
             </ul>
           )}

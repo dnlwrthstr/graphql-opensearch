@@ -446,3 +446,69 @@ li:last-child {
     flex-direction: row;
   }
 }
+
+/* Advanced Search Styles */
+.search-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+@media (min-width: 768px) {
+  .search-row {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .search-row .input-group {
+    width: 30%;
+  }
+
+  .search-row .name-field {
+    width: 40%;
+  }
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.partner-results-table-container, .instrument-results-table-container {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.partner-results-table, .instrument-results-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.partner-results-table th, .partner-results-table td,
+.instrument-results-table th, .instrument-results-table td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.partner-results-table th, .instrument-results-table th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+.partner-results-table tr:hover, .instrument-results-table tr:hover {
+  background-color: #f9f9f9;
+}
+
+.yes-value {
+  color: green;
+  font-weight: bold;
+}
+
+.no-value {
+  color: #999;
+}

@@ -161,6 +161,7 @@ query {
 
 #### Search Financial Instruments
 
+##### Basic Search
 ```graphql
 query {
   searchFinancialInstruments(query: "bond") {
@@ -171,6 +172,70 @@ query {
     currency
     type
     rating
+  }
+}
+```
+
+##### Advanced Search
+The API supports advanced search with field-specific queries and logical operators (AND, OR, NOT).
+
+```graphql
+query {
+  searchFinancialInstruments(query: "type:bond AND currency:USD AND rating:AAA") {
+    id
+    isin
+    name
+    issuer
+    currency
+    type
+    rating
+    coupon
+    face_value
+  }
+}
+```
+
+You can use wildcards in your search:
+
+```graphql
+query {
+  searchFinancialInstruments(query: "name:* AND issuer:Goldman*") {
+    id
+    isin
+    name
+    issuer
+    type
+    currency
+  }
+}
+```
+
+Search for ETFs with specific index:
+
+```graphql
+query {
+  searchFinancialInstruments(query: "type:etf AND index_tracked:S&P 500") {
+    id
+    name
+    isin
+    type
+    index_tracked
+    total_expense_ratio
+  }
+}
+```
+
+Search for structured products with specific characteristics:
+
+```graphql
+query {
+  searchFinancialInstruments(query: "type:structured_product AND capital_protection:false") {
+    id
+    name
+    type
+    barrier_level
+    capital_protection
+    underlyings
   }
 }
 ```
