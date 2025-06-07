@@ -1,0 +1,272 @@
+diff --git a/frontend/src/components/AdvancedPartnerSearch.js b/frontend/src/components/AdvancedPartnerSearch.js
+index 1554fb6..0de33d3 100644
+--- a/frontend/src/components/AdvancedPartnerSearch.js
++++ b/frontend/src/components/AdvancedPartnerSearch.js
+@@ -1,5 +1,5 @@
+-import React, { useState } from 'react';
+-import { gql, useQuery } from '@apollo/client';
++import React, { useState, useEffect } from 'react';
++import { gql, useQuery, useLazyQuery } from '@apollo/client';
+
+ // GraphQL query for searching partners
+ const SEARCH_PARTNERS = gql`
+@@ -24,9 +24,22 @@ const SEARCH_PARTNERS = gql`
+   }
+ `;
+
++// GraphQL query for autocomplete
++const AUTOCOMPLETE_PARTNER_NAME = gql`
++  query AutocompletePartnerName($query: String!) {
++    autocompletePartnerName(query: $query) {
++      id
++      name
++      residency_country
++      nationality
++    }
++  }
++`;
++
+ function AdvancedPartnerSearch() {
+   const [searchParams, setSearchParams] = useState({
+     name: '',
++    partner_id: '',
+     partner_type: '',
+     residency_country: '',
+     nationality: '',
+@@ -37,15 +50,45 @@ function AdvancedPartnerSearch() {
+     pep_flag: '',
+     sanctions_screened: ''
+   });
+-
++
+   const [executeQuery, setExecuteQuery] = useState(false);
+   const [searchQuery, setSearchQuery] = useState('');
++  const [suggestions, setSuggestions] = useState([]);
++  const [showSuggestions, setShowSuggestions] = useState(false);
+
+   const { loading, error, data } = useQuery(SEARCH_PARTNERS, {
+     variables: { query: searchQuery },
+     skip: !executeQuery
+   });
+
++  // Lazy query for autocomplete
++  const [getAutocompleteSuggestions, { loading: autocompleteLoading, data: autocompleteData }] = useLazyQuery(
++    AUTOCOMPLETE_PARTNER_NAME,
++    {
++      fetchPolicy: 'network-only', // Don't cache results
++      onCompleted: (data) => {
++        if (data && data.autocompletePartnerName) {
++          setSuggestions(data.autocompletePartnerName);
++          setShowSuggestions(true);
++        }
++      }
++    }
++  );
++
++  // Debounce function for autocomplete
++  useEffect(() => {
++    const timer = setTimeout(() => {
++      if (searchParams.name && searchParams.name.length >= 2) {
++        getAutocompleteSuggestions({ variables: { query: searchParams.name } });
++      } else {
++        setSuggestions([]);
++        setShowSuggestions(false);
++      }
++    }, 300); // 300ms debounce
++
++    return () => clearTimeout(timer);
++  }, [searchParams.name, getAutocompleteSuggestions]);
++
+   const handleInputChange = (e) => {
+     const { name, value } = e.target;
+     setSearchParams({
+@@ -54,6 +97,15 @@ function AdvancedPartnerSearch() {
+     });
+   };
+
++  const handleSuggestionClick = (suggestion) => {
++    setSearchParams({
++      ...searchParams,
++      name: suggestion.name,
++      partner_id: suggestion.id
++    });
++    setShowSuggestions(false);
++  };
++
+   const handleCheckboxChange = (e) => {
+     const { name, checked } = e.target;
+     setSearchParams({
+@@ -64,15 +116,20 @@ function AdvancedPartnerSearch() {
+
+   const handleSubmit = (e) => {
+     e.preventDefault();
+-
++
+     // Build search query from non-empty parameters
+     const queryParts = [];
+     Object.entries(searchParams).forEach(([key, value]) => {
+       if (value) {
+-        queryParts.push(`${key}:${value}`);
++        // Map partner_id to id in the search query
++        if (key === 'partner_id') {
++          queryParts.push(`id:${value}`);
++        } else {
++          queryParts.push(`${key}:${value}`);
++        }
+       }
+     });
+-
++
+     const query = queryParts.join(' AND ');
+     setSearchQuery(query);
+     setExecuteQuery(true);
+@@ -81,6 +138,7 @@ function AdvancedPartnerSearch() {
+   const handleReset = () => {
+     setSearchParams({
+       name: '',
++      partner_id: '',
+       partner_type: '',
+       residency_country: '',
+       nationality: '',
+@@ -101,15 +159,49 @@ function AdvancedPartnerSearch() {
+         <div className="search-inputs">
+           <div className="input-group">
+             <label>Name:</label>
++            <div className="autocomplete-container">
++              <input
++                type="text"
++                name="name"
++                value={searchParams.name}
++                onChange={handleInputChange}
++                placeholder="Partner name..."
++                onFocus={() => searchParams.name.length >= 2 && setShowSuggestions(true)}
++                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
++              />
++              {showSuggestions && suggestions.length > 0 && (
++                <div className="suggestions-dropdown">
++                  {suggestions.map((suggestion, index) => (
++                    <div
++                      key={index}
++                      className="suggestion-item"
++                      onClick={() => handleSuggestionClick(suggestion)}
++                    >
++                      <div className="suggestion-name">{suggestion.name}</div>
++                      <div className="suggestion-details">
++                        <span>ID: {suggestion.id}</span>
++                        {suggestion.residency_country && <span>Residence: {suggestion.residency_country}</span>}
++                        {suggestion.nationality && <span>Nationality: {suggestion.nationality}</span>}
++                      </div>
++                    </div>
++                  ))}
++                </div>
++              )}
++              {autocompleteLoading && <div className="loading-indicator">Loading suggestions...</div>}
++            </div>
++          </div>
++
++          <div className="input-group">
++            <label>Partner ID:</label>
+             <input
+               type="text"
+-              name="name"
+-              value={searchParams.name}
++              name="partner_id"
++              value={searchParams.partner_id}
+               onChange={handleInputChange}
+-              placeholder="Partner name..."
++              placeholder="Partner ID..."
+             />
+           </div>
+-
++
+           <div className="input-group">
+             <label>Partner Type:</label>
+             <select
+@@ -122,7 +214,7 @@ function AdvancedPartnerSearch() {
+               <option value="entity">Entity</option>
+             </select>
+           </div>
+-
++
+           <div className="input-group">
+             <label>Residency Country:</label>
+             <input
+@@ -133,7 +225,7 @@ function AdvancedPartnerSearch() {
+               placeholder="Country code (e.g., US, UK, DE)..."
+             />
+           </div>
+-
++
+           <div className="input-group">
+             <label>Nationality:</label>
+             <input
+@@ -144,7 +236,7 @@ function AdvancedPartnerSearch() {
+               placeholder="Country code (e.g., US, UK, DE)..."
+             />
+           </div>
+-
++
+           <div className="input-group">
+             <label>Legal Entity Type:</label>
+             <select
+@@ -159,7 +251,7 @@ function AdvancedPartnerSearch() {
+               <option value="foundation">Foundation</option>
+             </select>
+           </div>
+-
++
+           <div className="input-group">
+             <label>KYC Status:</label>
+             <select
+@@ -173,7 +265,7 @@ function AdvancedPartnerSearch() {
+               <option value="rejected">Rejected</option>
+             </select>
+           </div>
+-
++
+           <div className="input-group">
+             <label>Risk Level:</label>
+             <select
+@@ -187,7 +279,7 @@ function AdvancedPartnerSearch() {
+               <option value="high">High</option>
+             </select>
+           </div>
+-
++
+           <div className="input-group">
+             <label>Account Type:</label>
+             <select
+@@ -201,7 +293,7 @@ function AdvancedPartnerSearch() {
+               <option value="corporate">Corporate</option>
+             </select>
+           </div>
+-
++
+           <div className="input-group checkbox-group">
+             <label>
+               <input
+@@ -213,7 +305,7 @@ function AdvancedPartnerSearch() {
+               PEP Flag
+             </label>
+           </div>
+-
++
+           <div className="input-group checkbox-group">
+             <label>
+               <input
+@@ -226,7 +318,7 @@ function AdvancedPartnerSearch() {
+             </label>
+           </div>
+         </div>
+-
++
+         <div className="button-group">
+           <button type="submit">Search</button>
+           <button type="button" onClick={handleReset}>Reset</button>
+@@ -269,4 +361,4 @@ function AdvancedPartnerSearch() {
+   );
+ }
+
+-export default AdvancedPartnerSearch;
+\ No newline at end of file
++export default AdvancedPartnerSearch;

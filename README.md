@@ -1,6 +1,6 @@
 # GraphQL OpenSearch API
 
-A GraphQL API that provides a search interface for papers and datasets stored in OpenSearch.
+A GraphQL API that provides a search interface for financial data stored in OpenSearch.
 
 ## Project Overview
 
@@ -91,29 +91,6 @@ You can use the OpenSearch Dashboard to:
 
 ### Example Queries
 
-#### Search Papers
-
-```graphql
-query {
-  searchPapers(query: "neural") {
-    id
-    title
-    authors
-  }
-}
-```
-
-#### Search Datasets
-
-```graphql
-query {
-  searchDatasets(query: "medical") {
-    id
-    name
-    domain
-  }
-}
-```
 
 #### Search Partners
 
@@ -257,17 +234,6 @@ query {
 
 ### Types
 
-#### Paper
-
-- `id`: ID! - Unique identifier
-- `title`: String! - Paper title
-- `authors`: [String!]! - List of authors
-
-#### Dataset
-
-- `id`: ID! - Unique identifier
-- `name`: String! - Dataset name
-- `domain`: String - Domain/category of the dataset
 
 #### Partner
 
@@ -329,8 +295,6 @@ query {
 
 ### Queries
 
-- `searchPapers(query: String!)`: [Paper!]! - Search for papers matching the query
-- `searchDatasets(query: String!)`: [Dataset!]! - Search for datasets matching the query
 - `searchPartners(query: String!)`: [Partner!]! - Search for partners matching the query
 - `searchPortfolios(query: String!)`: [Portfolio!]! - Search for portfolios matching the query
 - `searchFinancialInstruments(query: String!)`: [FinancialInstrument!]! - Search for financial instruments matching the query

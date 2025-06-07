@@ -340,3 +340,67 @@ li:last-child {
   overflow-x: auto;
   max-width: 100%;
 }
+
+/* Autocomplete styles */
+.autocomplete-container {
+  position: relative;
+  width: 100%;
+}
+
+.suggestions-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+}
+
+.suggestion-item {
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.suggestion-item:hover {
+  background-color: #f5f5f5;
+}
+
+.loading-indicator {
+  padding: 10px;
+  text-align: center;
+  color: #666;
+  font-style: italic;
+}
+
+/* Styles for enhanced suggestion dropdown */
+.suggestion-name {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.suggestion-details {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  color: #666;
+}
+
+.suggestion-details span {
+  margin-right: 10px;
+}
+
+@media (min-width: 768px) {
+  .suggestion-details {
+    flex-direction: row;
+  }
+}

@@ -87,6 +87,13 @@ type_defs = gql("""
         capital_protection: Boolean
     }
 
+    type PartnerSuggestion {
+        id: ID!
+        name: String!
+        residency_country: String
+        nationality: String
+    }
+
     type Query {
         getPartner(id: ID!): Partner
         getPortfolio(id: ID!): Portfolio
@@ -94,6 +101,7 @@ type_defs = gql("""
         searchPartners(query: String, id: ID): [Partner!]!
         searchPortfolios(query: String, id: ID): [Portfolio!]!
         searchFinancialInstruments(query: String, id: ID): [FinancialInstrument!]!
+        autocompletePartnerName(query: String!): [PartnerSuggestion!]!
     }
 """)
 
@@ -189,6 +197,56 @@ def resolve_get_financial_instrument(_, info, id):
 
 # Register the resolver using set_field method
 query.set_field("getFinancialInstrument", resolve_get_financial_instrument)
+
+# Define the resolver function for autocompletePartnerName
+def resolve_autocomplete_partner_name(_, info, query):
+    try:
+        # Use OpenSearch's completion suggester for autocomplete
+        suggest_query = {
+            "suggest": {
+                "name_completion": {
+                    "prefix": query,
+                    "completion": {
+                        "field": "name_suggest",
+                        "size": 10
+                    }
+                }
+            }
+        }
+
+        res = client.search(index="partners", body=suggest_query)
+
+        # Extract suggestions from the response
+        suggestions = []
+        if "suggest" in res and "name_completion" in res["suggest"]:
+            for suggestion_group in res["suggest"]["name_completion"]:
+                for option in suggestion_group["options"]:
+                    # Get the full partner document to access additional fields
+                    partner_id = option["_id"]
+                    try:
+                        partner_doc = client.get(index="partners", id=partner_id)
+                        partner_source = partner_doc["_source"]
+
+                        # Create a suggestion object with id, name, residency_country, and nationality
+                        suggestion = {
+                            "id": partner_id,
+                            "name": option["text"],
+                            "residency_country": partner_source.get("residency_country"),
+                            "nationality": partner_source.get("nationality")
+                        }
+                        suggestions.append(suggestion)
+                    except Exception as e:
+                        print(f"Error retrieving partner details: {e}")
+                        # Fall back to just the name if we can't get the full document
+                        suggestions.append({"id": option["_id"], "name": option["text"], "residency_country": None, "nationality": None})
+
+        return suggestions
+    except Exception as e:
+        print(f"Error getting partner name suggestions: {e}")
+        return []
+
+# Register the resolver for autocompletePartnerName
+query.set_field("autocompletePartnerName", resolve_autocomplete_partner_name)
 
 # Define resolvers for the new fields
 from ariadne import ObjectType
