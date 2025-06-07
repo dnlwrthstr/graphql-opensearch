@@ -129,8 +129,31 @@ def resolve_search_partners(_, info, query=None, id=None):
         # Search by ID
         search_query = {"term": {"id": id}}
     else:
-        # Search by query string
-        search_query = {"multi_match": {"query": query, "fields": ["name", "partner_type", "residency_country", "nationality"]}}
+        # Check if the query contains field:value format with AND logic
+        if ' AND ' in query:
+            # Parse the query string to extract field:value pairs
+            field_queries = []
+            for part in query.split(' AND '):
+                if ':' in part:
+                    field, value = part.split(':', 1)
+                    # Handle different field types appropriately
+                    if field in ['pep_flag', 'sanctions_screened']:
+                        # Boolean fields
+                        bool_value = value.lower() == 'true'
+                        field_queries.append({"term": {field: bool_value}})
+                    else:
+                        # Text fields
+                        field_queries.append({"match": {field: value}})
+
+            # Create a bool query with must (AND) logic
+            if field_queries:
+                search_query = {"bool": {"must": field_queries}}
+            else:
+                # Fallback to multi_match if parsing fails
+                search_query = {"multi_match": {"query": query, "fields": ["name", "partner_type", "residency_country", "nationality"]}}
+        else:
+            # Use multi_match for simple queries
+            search_query = {"multi_match": {"query": query, "fields": ["name", "partner_type", "residency_country", "nationality"]}}
 
     # Add size parameter to retrieve up to 10000 partners
     res = client.search(index="partners", body={"query": search_query, "size": 10000})

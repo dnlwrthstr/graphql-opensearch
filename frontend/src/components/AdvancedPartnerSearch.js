@@ -39,7 +39,7 @@ function AdvancedPartnerSearch() {
     sanctions_screened: ''
   });
 
-  const [executeQuery, setExecuteQuery] = useState(true);
+  const [executeQuery, setExecuteQuery] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchId, setSearchId] = useState(null);
 
@@ -47,12 +47,6 @@ function AdvancedPartnerSearch() {
     variables: { query: searchQuery, id: searchId },
     skip: !executeQuery
   });
-
-  // Load all partners when component mounts
-  useEffect(() => {
-    // Initial query will use null for both query and id, which will retrieve all partners
-    setExecuteQuery(true);
-  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

@@ -13,6 +13,101 @@ code {
     monospace;
 }
 
+/* Advanced Partner Search styles */
+.partner-portfolio-view-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Input section styles */
+.search-inputs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  background-color: #e8f4fc;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.input-group {
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group label {
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: #2c3e50;
+  font-size: 0.9rem;
+}
+
+.input-group input[type="text"],
+.input-group select {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.input-group.checkbox-group {
+  flex-direction: row;
+  align-items: center;
+}
+
+.input-group.checkbox-group label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.input-group.checkbox-group input[type="checkbox"] {
+  margin-right: 6px;
+}
+
+.button-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.button-group button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.button-group button[type="submit"] {
+  background-color: #3498db;
+  color: white;
+}
+
+.button-group button[type="button"] {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+/* Results section styles */
+.results {
+  background-color: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.results h3 {
+  color: #2c3e50;
+  margin-top: 0;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+}
+
 /* Partner search results table styles */
 .partner-results-table-container {
   max-height: 600px;
