@@ -23,9 +23,9 @@ code {
 
 /* Input section styles */
 .search-inputs {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
   background-color: #e8f4fc;
   padding: 15px;
   border-radius: 8px;
@@ -35,6 +35,26 @@ code {
   max-height: 400px;
   overflow-y: auto;
   width: 100%;
+}
+
+.search-row {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.search-row .input-group {
+  flex: 1;
+}
+
+.search-row .input-group.name-field {
+  flex: 2;
+}
+
+/* For the fourth row with only one field */
+.search-row:last-child .input-group {
+  flex: 0 0 33.33%;
+  margin-right: auto;
 }
 
 .input-group {

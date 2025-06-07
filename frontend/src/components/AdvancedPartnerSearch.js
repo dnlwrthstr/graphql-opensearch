@@ -135,152 +135,163 @@ function AdvancedPartnerSearch() {
       <h2>Advanced Partner Search</h2>
       <form onSubmit={handleSubmit}>
         <div className="search-inputs">
-          <div className="input-group">
-            <label>Name:</label>
-            <input
-              type="text"
-              name="name"
-              value={searchParams.name}
-              onChange={handleInputChange}
-              placeholder="Partner name (supports wildcards: *, ? and expressions: AND, OR, NOT)..."
-            />
+          {/* First row: name (make larger field), partner type, legal entity type */}
+          <div className="search-row">
+            <div className="input-group name-field">
+              <label>Name:</label>
+              <input
+                type="text"
+                name="name"
+                value={searchParams.name}
+                onChange={handleInputChange}
+                placeholder="Partner name (supports wildcards: *, ? and expressions: AND, OR, NOT)..."
+              />
+            </div>
+
+            <div className="input-group">
+              <label>Partner Type:</label>
+              <select
+                name="partner_type"
+                value={searchParams.partner_type}
+                onChange={handleInputChange}
+              >
+                <option value="">Select...</option>
+                <option value="individual">Individual</option>
+                <option value="entity">Entity</option>
+              </select>
+            </div>
+
+            <div className="input-group">
+              <label>Legal Entity Type:</label>
+              <select
+                name="legal_entity_type"
+                value={searchParams.legal_entity_type}
+                onChange={handleInputChange}
+              >
+                <option value="">Select...</option>
+                <option value="individual">Individual</option>
+                <option value="corporation">Corporation</option>
+                <option value="trust">Trust</option>
+                <option value="foundation">Foundation</option>
+              </select>
+            </div>
           </div>
 
+          {/* Second row: Nationality, Residence Country, PEP Flag */}
+          <div className="search-row">
+            <div className="input-group">
+              <label>Nationality:</label>
+              <select
+                name="nationality"
+                value={searchParams.nationality}
+                onChange={handleInputChange}
+              >
+                <option value="">Select...</option>
+                {!loadingNationalities && !errorNationalities && nationalityData && nationalityData.getUniqueCountryValues && 
+                  nationalityData.getUniqueCountryValues.map(country => (
+                    <option key={country.value} value={country.value}>
+                      {country.value} ({country.count})
+                    </option>
+                  ))
+                }
+              </select>
+              {loadingNationalities && <span className="loading-indicator">Loading...</span>}
+              {errorNationalities && <span className="error-message">Error loading countries</span>}
+            </div>
 
-          <div className="input-group">
-            <label>Partner Type:</label>
-            <select
-              name="partner_type"
-              value={searchParams.partner_type}
-              onChange={handleInputChange}
-            >
-              <option value="">Select...</option>
-              <option value="individual">Individual</option>
-              <option value="entity">Entity</option>
-            </select>
+            <div className="input-group">
+              <label>Residency Country:</label>
+              <select
+                name="residency_country"
+                value={searchParams.residency_country}
+                onChange={handleInputChange}
+              >
+                <option value="">Select...</option>
+                {!loadingResidencies && !errorResidencies && residencyData && residencyData.getUniqueCountryValues && 
+                  residencyData.getUniqueCountryValues.map(country => (
+                    <option key={country.value} value={country.value}>
+                      {country.value} ({country.count})
+                    </option>
+                  ))
+                }
+              </select>
+              {loadingResidencies && <span className="loading-indicator">Loading...</span>}
+              {errorResidencies && <span className="error-message">Error loading countries</span>}
+            </div>
+
+            <div className="input-group">
+              <label>PEP Flag:</label>
+              <select
+                name="pep_flag"
+                value={searchParams.pep_flag}
+                onChange={handleInputChange}
+              >
+                <option value="">No Selection</option>
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+              </select>
+            </div>
           </div>
 
-          <div className="input-group">
-            <label>Residency Country:</label>
-            <select
-              name="residency_country"
-              value={searchParams.residency_country}
-              onChange={handleInputChange}
-            >
-              <option value="">Select...</option>
-              {!loadingResidencies && !errorResidencies && residencyData && residencyData.getUniqueCountryValues && 
-                residencyData.getUniqueCountryValues.map(country => (
-                  <option key={country.value} value={country.value}>
-                    {country.value} ({country.count})
-                  </option>
-                ))
-              }
-            </select>
-            {loadingResidencies && <span className="loading-indicator">Loading...</span>}
-            {errorResidencies && <span className="error-message">Error loading countries</span>}
+          {/* Third row: KYC Status, Sanction Screened, risk level */}
+          <div className="search-row">
+            <div className="input-group">
+              <label>KYC Status:</label>
+              <select
+                name="kyc_status"
+                value={searchParams.kyc_status}
+                onChange={handleInputChange}
+              >
+                <option value="">Select...</option>
+                <option value="pending">Pending</option>
+                <option value="verified">Verified</option>
+                <option value="rejected">Rejected</option>
+              </select>
+            </div>
+
+            <div className="input-group">
+              <label>Sanctions Screened:</label>
+              <select
+                name="sanctions_screened"
+                value={searchParams.sanctions_screened}
+                onChange={handleInputChange}
+              >
+                <option value="">No Selection</option>
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+              </select>
+            </div>
+
+            <div className="input-group">
+              <label>Risk Level:</label>
+              <select
+                name="risk_level"
+                value={searchParams.risk_level}
+                onChange={handleInputChange}
+              >
+                <option value="">Select...</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+            </div>
           </div>
 
-          <div className="input-group">
-            <label>Nationality:</label>
-            <select
-              name="nationality"
-              value={searchParams.nationality}
-              onChange={handleInputChange}
-            >
-              <option value="">Select...</option>
-              {!loadingNationalities && !errorNationalities && nationalityData && nationalityData.getUniqueCountryValues && 
-                nationalityData.getUniqueCountryValues.map(country => (
-                  <option key={country.value} value={country.value}>
-                    {country.value} ({country.count})
-                  </option>
-                ))
-              }
-            </select>
-            {loadingNationalities && <span className="loading-indicator">Loading...</span>}
-            {errorNationalities && <span className="error-message">Error loading countries</span>}
-          </div>
-
-          <div className="input-group">
-            <label>Legal Entity Type:</label>
-            <select
-              name="legal_entity_type"
-              value={searchParams.legal_entity_type}
-              onChange={handleInputChange}
-            >
-              <option value="">Select...</option>
-              <option value="individual">Individual</option>
-              <option value="corporation">Corporation</option>
-              <option value="trust">Trust</option>
-              <option value="foundation">Foundation</option>
-            </select>
-          </div>
-
-          <div className="input-group">
-            <label>KYC Status:</label>
-            <select
-              name="kyc_status"
-              value={searchParams.kyc_status}
-              onChange={handleInputChange}
-            >
-              <option value="">Select...</option>
-              <option value="pending">Pending</option>
-              <option value="verified">Verified</option>
-              <option value="rejected">Rejected</option>
-            </select>
-          </div>
-
-          <div className="input-group">
-            <label>Risk Level:</label>
-            <select
-              name="risk_level"
-              value={searchParams.risk_level}
-              onChange={handleInputChange}
-            >
-              <option value="">Select...</option>
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-            </select>
-          </div>
-
-          <div className="input-group">
-            <label>Account Type:</label>
-            <select
-              name="account_type"
-              value={searchParams.account_type}
-              onChange={handleInputChange}
-            >
-              <option value="">Select...</option>
-              <option value="retail">Retail</option>
-              <option value="private">Private</option>
-              <option value="corporate">Corporate</option>
-            </select>
-          </div>
-
-          <div className="input-group">
-            <label>PEP Flag:</label>
-            <select
-              name="pep_flag"
-              value={searchParams.pep_flag}
-              onChange={handleInputChange}
-            >
-              <option value="">No Selection</option>
-              <option value="true">Yes</option>
-              <option value="false">No</option>
-            </select>
-          </div>
-
-          <div className="input-group">
-            <label>Sanctions Screened:</label>
-            <select
-              name="sanctions_screened"
-              value={searchParams.sanctions_screened}
-              onChange={handleInputChange}
-            >
-              <option value="">No Selection</option>
-              <option value="true">Yes</option>
-              <option value="false">No</option>
-            </select>
+          {/* Fourth row: Account Type */}
+          <div className="search-row">
+            <div className="input-group">
+              <label>Account Type:</label>
+              <select
+                name="account_type"
+                value={searchParams.account_type}
+                onChange={handleInputChange}
+              >
+                <option value="">Select...</option>
+                <option value="retail">Retail</option>
+                <option value="private">Private</option>
+                <option value="corporate">Corporate</option>
+              </select>
+            </div>
           </div>
         </div>
 
