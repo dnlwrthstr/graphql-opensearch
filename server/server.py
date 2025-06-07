@@ -147,6 +147,15 @@ def resolve_search_partners(_, info, query=None, id=None):
                         # Boolean fields
                         bool_value = value.lower() == 'true'
                         field_queries.append({"term": {field: bool_value}})
+                    elif field == 'name':
+                        # Use query_string for name field to support expressions and wildcards
+                        field_queries.append({
+                            "query_string": {
+                                "default_field": "name",
+                                "query": value,
+                                "analyze_wildcard": True
+                            }
+                        })
                     else:
                         # Text fields
                         field_queries.append({"match": {field: value}})

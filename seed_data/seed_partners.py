@@ -15,12 +15,28 @@ def seed_partners():
         client.indices.delete(index="partners")
         print("Deleted existing partners index")
 
-    # Create mapping with name_suggest field for autocomplete
+    # Create mapping with name_suggest field for autocomplete, name field for full-text search, and keyword fields for dropdowns
     mapping = {
         "mappings": {
             "properties": {
                 "name_suggest": {
                     "type": "completion"
+                },
+                "name": {
+                    "type": "text",
+                    "analyzer": "standard",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                        }
+                    }
+                },
+                "nationality": {
+                    "type": "keyword"
+                },
+                "residency_country": {
+                    "type": "keyword"
                 }
             }
         }

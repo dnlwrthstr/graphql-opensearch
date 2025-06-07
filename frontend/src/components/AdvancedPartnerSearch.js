@@ -36,8 +36,7 @@ const GET_UNIQUE_COUNTRY_VALUES = gql`
 
 function AdvancedPartnerSearch() {
   const [searchParams, setSearchParams] = useState({
-    name: '',
-    partner_id: '',
+    name: '*',
     partner_type: '',
     residency_country: '',
     nationality: '',
@@ -60,22 +59,28 @@ function AdvancedPartnerSearch() {
   });
 
   // Query for unique nationality values
-  const { loading: loadingNationalities, error: errorNationalities, data: nationalityData } = useQuery(GET_UNIQUE_COUNTRY_VALUES, {
+  const { loading: loadingNationalities, error: errorNationalities, data: nationalityData, refetch: refetchNationalities } = useQuery(GET_UNIQUE_COUNTRY_VALUES, {
     variables: { 
       field: "nationality",
-      filter: searchParams.residency_country ? `residency_country:${searchParams.residency_country}` : null
+      filter: null
     },
     fetchPolicy: "network-only" // Don't cache this query
   });
 
   // Query for unique residency_country values
-  const { loading: loadingResidencies, error: errorResidencies, data: residencyData } = useQuery(GET_UNIQUE_COUNTRY_VALUES, {
+  const { loading: loadingResidencies, error: errorResidencies, data: residencyData, refetch: refetchResidencies } = useQuery(GET_UNIQUE_COUNTRY_VALUES, {
     variables: { 
       field: "residency_country",
-      filter: searchParams.nationality ? `nationality:${searchParams.nationality}` : null
+      filter: null
     },
     fetchPolicy: "network-only" // Don't cache this query
   });
+
+  // Ensure data is loaded on component mount
+  useEffect(() => {
+    refetchNationalities();
+    refetchResidencies();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -85,43 +90,30 @@ function AdvancedPartnerSearch() {
     });
   };
 
-  const handleCheckboxChange = (e) => {
-    const { name, checked } = e.target;
-    setSearchParams({
-      ...searchParams,
-      [name]: checked ? 'true' : ''
-    });
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Check if partner_id is provided
-    if (searchParams.partner_id) {
-      // If partner_id is provided, use it directly for ID search
-      setSearchId(searchParams.partner_id);
-      setSearchQuery('');
-    } else {
-      // Build search query from non-empty parameters (excluding partner_id)
-      const queryParts = [];
-      Object.entries(searchParams).forEach(([key, value]) => {
-        if (value && key !== 'partner_id') {
-          queryParts.push(`${key}:${value}`);
-        }
-      });
+    // Build search query from non-empty parameters
+    const queryParts = [];
+    Object.entries(searchParams).forEach(([key, value]) => {
+      // Skip the name field if it's empty (it will be treated as a wildcard)
+      // Include both 'true' and 'false' values for boolean fields
+      if ((value && (key !== 'name' || value.trim() !== '')) || value === 'false') {
+        queryParts.push(`${key}:${value}`);
+      }
+    });
 
-      const query = queryParts.join(' AND ');
-      setSearchQuery(query);
-      setSearchId(null);
-    }
+    const query = queryParts.join(' AND ');
+    setSearchQuery(query);
+    setSearchId(null);
 
     setExecuteQuery(true);
   };
 
   const handleReset = () => {
     setSearchParams({
-      name: '',
-      partner_id: '',
+      name: '*',
       partner_type: '',
       residency_country: '',
       nationality: '',
@@ -137,6 +129,7 @@ function AdvancedPartnerSearch() {
     setExecuteQuery(false);
   };
 
+
   return (
     <div className="partner-portfolio-view-container">
       <h2>Advanced Partner Search</h2>
@@ -149,20 +142,10 @@ function AdvancedPartnerSearch() {
               name="name"
               value={searchParams.name}
               onChange={handleInputChange}
-              placeholder="Partner name (full text search)..."
+              placeholder="Partner name (supports wildcards: *, ? and expressions: AND, OR, NOT)..."
             />
           </div>
 
-          <div className="input-group">
-            <label>Partner ID:</label>
-            <input
-              type="text"
-              name="partner_id"
-              value={searchParams.partner_id}
-              onChange={handleInputChange}
-              placeholder="Partner ID..."
-            />
-          </div>
 
           <div className="input-group">
             <label>Partner Type:</label>
@@ -274,28 +257,30 @@ function AdvancedPartnerSearch() {
             </select>
           </div>
 
-          <div className="input-group checkbox-group">
-            <label>
-              <input
-                type="checkbox"
-                name="pep_flag"
-                checked={searchParams.pep_flag === 'true'}
-                onChange={handleCheckboxChange}
-              />
-              PEP Flag
-            </label>
+          <div className="input-group">
+            <label>PEP Flag:</label>
+            <select
+              name="pep_flag"
+              value={searchParams.pep_flag}
+              onChange={handleInputChange}
+            >
+              <option value="">No Selection</option>
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+            </select>
           </div>
 
-          <div className="input-group checkbox-group">
-            <label>
-              <input
-                type="checkbox"
-                name="sanctions_screened"
-                checked={searchParams.sanctions_screened === 'true'}
-                onChange={handleCheckboxChange}
-              />
-              Sanctions Screened
-            </label>
+          <div className="input-group">
+            <label>Sanctions Screened:</label>
+            <select
+              name="sanctions_screened"
+              value={searchParams.sanctions_screened}
+              onChange={handleInputChange}
+            >
+              <option value="">No Selection</option>
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+            </select>
           </div>
         </div>
 
@@ -308,55 +293,60 @@ function AdvancedPartnerSearch() {
       {loading && <p>Loading...</p>}
       {error && <p>Error: {error.message}</p>}
 
-      {data && data.searchPartners && (
-        <div className="results">
-          <h3>Search Results ({data.searchPartners.length} partners found)</h3>
-          {data.searchPartners.length === 0 ? (
-            <p>No partners found matching your criteria</p>
-          ) : (
-            <div className="partner-results-table-container">
-              <table className="partner-results-table">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Type</th>
-                    <th>Legal Entity Type</th>
-                    <th>Residence</th>
-                    <th>Nationality</th>
-                    <th>KYC Status</th>
-                    <th>Risk Level</th>
-                    <th>Account Type</th>
-                    <th>PEP Flag</th>
-                    <th>Sanctions Screened</th>
-                    <th>Incorporation Date</th>
+      <div className="results">
+        <h3>Search Results {data && data.searchPartners ? `(${data.searchPartners.length} partners found)` : ''}</h3>
+
+        <div className="partner-results-table-container">
+          <table className="partner-results-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Legal Entity Type</th>
+                <th>Residence</th>
+                <th>Nationality</th>
+                <th>KYC Status</th>
+                <th>Risk Level</th>
+                <th>Account Type</th>
+                <th>PEP Flag</th>
+                <th>Sanctions Screened</th>
+                <th>Incorporation Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data && data.searchPartners && data.searchPartners.length > 0 ? (
+                data.searchPartners.map(partner => (
+                  <tr key={partner.id}>
+                    <td>{partner.name}</td>
+                    <td>{partner.partner_type}</td>
+                    <td>{partner.partner_type === 'individual' ? 'Individual' : (partner.legal_entity_type || '-')}</td>
+                    <td>{partner.residency_country}</td>
+                    <td>{partner.nationality || '-'}</td>
+                    <td>{partner.kyc_status}</td>
+                    <td>{partner.risk_level}</td>
+                    <td>{partner.account_type}</td>
+                    <td className={partner.pep_flag ? 'yes-value' : 'no-value'}>
+                      {partner.pep_flag ? 'Yes' : 'No'}
+                    </td>
+                    <td className={partner.sanctions_screened ? 'yes-value' : 'no-value'}>
+                      {partner.sanctions_screened ? 'Yes' : 'No'}
+                    </td>
+                    <td>{partner.incorporation_date || (partner.birth_date || '-')}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {data.searchPartners.map(partner => (
-                    <tr key={partner.id}>
-                      <td>{partner.name}</td>
-                      <td>{partner.partner_type}</td>
-                      <td>{partner.partner_type === 'individual' ? 'Individual' : (partner.legal_entity_type || '-')}</td>
-                      <td>{partner.residency_country}</td>
-                      <td>{partner.nationality || '-'}</td>
-                      <td>{partner.kyc_status}</td>
-                      <td>{partner.risk_level}</td>
-                      <td>{partner.account_type}</td>
-                      <td className={partner.pep_flag ? 'yes-value' : 'no-value'}>
-                        {partner.pep_flag ? 'Yes' : 'No'}
-                      </td>
-                      <td className={partner.sanctions_screened ? 'yes-value' : 'no-value'}>
-                        {partner.sanctions_screened ? 'Yes' : 'No'}
-                      </td>
-                      <td>{partner.incorporation_date || (partner.birth_date || '-')}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="11" style={{textAlign: 'center'}}>
+                    {data && data.searchPartners && data.searchPartners.length === 0 
+                      ? 'No partners found matching your criteria' 
+                      : 'Use the search form above to find partners'}
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
-      )}
+      </div>
     </div>
   );
 }
