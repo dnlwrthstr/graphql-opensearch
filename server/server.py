@@ -995,7 +995,9 @@ async def health_check(request):
 
 print("Mounting GraphQL app with schema...")
 graphql_app = GraphQL(schema, debug=True)
+# Mount the GraphQL app at both root and /graphql paths for compatibility
 app.mount("/", graphql_app)
+app.mount("/graphql", graphql_app)
 
 # Expose app at module level for Uvicorn
 app = app
