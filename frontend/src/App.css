@@ -263,6 +263,15 @@ li:last-child {
   border-radius: 8px;
 }
 
+.search-panel h2 {
+  margin-top: 0;
+  color: #333;
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
 .overview-panel {
   flex: 1;
   min-width: 280px;
@@ -270,6 +279,15 @@ li:last-child {
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 0 6px rgba(0,0,0,0.1);
+}
+
+.overview-panel h2 {
+  margin-top: 0;
+  color: #333;
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-align: center;
 }
 
 /* Partner Overview Styles */
@@ -286,7 +304,7 @@ li:last-child {
 .partner-overview-container h2 {
   margin-top: 0;
   color: #333;
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 600;
   margin-bottom: 20px;
   text-align: center;
@@ -294,6 +312,7 @@ li:last-child {
 
 .chart-container {
   margin-bottom: 30px;
+  width: 100%;
 }
 
 .chart-container h3 {
@@ -302,22 +321,11 @@ li:last-child {
   border-bottom: 2px solid #4CAF50;
   padding-bottom: 8px;
   margin-bottom: 15px;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 500;
 }
 
-/* Arrange charts horizontally on larger screens */
-@media (min-width: 992px) {
-  .partner-overview-container {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: space-between;
-  }
-
-  .chart-container {
-    width: 48%;
-  }
-}
+/* Always keep charts stacked vertically regardless of screen size */
 
 /* Partner Portfolio View Styles */
 .partner-portfolio-view-container {
@@ -360,6 +368,8 @@ li:last-child {
   color: #333;
   border-bottom: 2px solid #4CAF50;
   padding-bottom: 8px;
+  font-size: 18px;
+  font-weight: 500;
 }
 
 .partner-info p {
@@ -409,6 +419,15 @@ li:last-child {
   width: 100%;
 }
 
+.portfolios-section h3 {
+  margin-top: 0;
+  color: #333;
+  border-bottom: 2px solid #4CAF50;
+  padding-bottom: 8px;
+  font-size: 18px;
+  font-weight: 500;
+}
+
 .portfolio-item {
   background-color: white;
   margin-bottom: 15px;
@@ -433,6 +452,8 @@ li:last-child {
 .portfolio-header h4 {
   margin: 0;
   color: #333;
+  font-size: 16px;
+  font-weight: 500;
 }
 
 .portfolio-summary {
@@ -455,6 +476,8 @@ li:last-child {
   color: #333;
   border-bottom: 2px solid #4CAF50;
   padding-bottom: 8px;
+  font-size: 15px;
+  font-weight: 500;
 }
 
 .positions-list table {
