@@ -351,5 +351,62 @@ class TestSearchFinancialInstruments(unittest.TestCase):
         self.assertIn("match", bool_query["bool"]["must_not"][0])
         self.assertEqual(bool_query["bool"]["must_not"][0]["match"]["currency"], "JPY")
 
+    @patch('server.server.client')
+    def test_advanced_search_with_spaces_in_values(self, mock_client):
+        # Setup mock response
+        mock_response = {
+            "hits": {
+                "hits": [
+                    {
+                        "_id": "inst-6",
+                        "_source": {
+                            "isin": "US78462F1030",
+                            "name": "SPDR S&P 500 ETF Trust",
+                            "issuer": "State Street Global Advisors",
+                            "currency": "USD",
+                            "country": "US",
+                            "type": "etf",
+                            "index_tracked": "S&P 500",
+                            "total_expense_ratio": 0.09
+                        }
+                    }
+                ]
+            }
+        }
+        mock_client.search.return_value = mock_response
+
+        # Call the resolver with a query containing spaces in values
+        result = resolve_search_financial_instruments(None, None, query="type:etf AND index_tracked:S&P 500")
+
+        # Assert the client was called with the correct parameters
+        mock_client.search.assert_called_once()
+        call_args = mock_client.search.call_args[1]
+        self.assertEqual(call_args["index"], "financial_instruments")
+
+        # Check that the query is a bool query with must clauses
+        query = call_args["body"]["query"]
+        self.assertIn("bool", query)
+        self.assertIn("must", query["bool"])
+
+        # Check that there are 2 must clauses (one for each field)
+        must_clauses = query["bool"]["must"]
+        self.assertEqual(len(must_clauses), 2)
+
+        # Check that the clauses are for the correct fields
+        type_clause = next((c for c in must_clauses if "match" in c and "type" in c["match"]), None)
+        index_clause = next((c for c in must_clauses if "match" in c and "index_tracked" in c["match"]), None)
+
+        self.assertIsNotNone(type_clause)
+        self.assertIsNotNone(index_clause)
+        self.assertEqual(type_clause["match"]["type"], "etf")
+        self.assertEqual(index_clause["match"]["index_tracked"], "S&P 500")
+
+        # Assert the result is as expected
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["id"], "inst-6")
+        self.assertEqual(result[0]["type"], "etf")
+        self.assertEqual(result[0]["index_tracked"], "S&P 500")
+        self.assertEqual(result[0]["total_expense_ratio"], 0.09)
+
 if __name__ == '__main__':
     unittest.main()

@@ -10,7 +10,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY server/ ./server/
 
 # Copy GraphQL schema
-COPY graphql/schema.graphql ../graphql/schema.graphql
+COPY graphql/schema.graphql /app/graphql/schema.graphql
 
 # Set the working directory to where the server code is
 WORKDIR /app/server

@@ -122,35 +122,76 @@ def resolve_search_financial_instruments(_, info, query=None, id=None):
             current_operator = "AND"  # Default operator
             current_clause = []
 
-            # First, split by spaces to separate operators and field:value pairs
-            tokens = query.split()
-            i = 0
-            while i < len(tokens):
-                token = tokens[i]
+            # Split by logical operators (AND, OR, NOT) while preserving field:value pairs
+            parts = []
+            current_part = ""
+            in_field_value = False
+            field_name = ""
 
-                if token == "AND":
+            # First pass: identify field:value pairs and logical operators
+            i = 0
+            while i < len(query):
+                # Check for logical operators
+                if query[i:i+5] == " AND ":
+                    if current_part.strip():
+                        parts.append(current_part.strip())
+                    parts.append("AND")
+                    current_part = ""
+                    in_field_value = False  # Reset flag when we encounter a logical operator
+                    i += 5
+                elif query[i:i+4] == " OR ":
+                    if current_part.strip():
+                        parts.append(current_part.strip())
+                    parts.append("OR")
+                    current_part = ""
+                    in_field_value = False  # Reset flag when we encounter a logical operator
+                    i += 4
+                elif query[i:i+5] == " NOT ":
+                    if current_part.strip():
+                        parts.append(current_part.strip())
+                    parts.append("NOT")
+                    current_part = ""
+                    in_field_value = False  # Reset flag when we encounter a logical operator
+                    i += 5
+                else:
+                    # Check if we're entering a field:value pair
+                    if ":" in current_part and not in_field_value:
+                        field_name = current_part.split(":")[0]
+                        in_field_value = True
+
+                    current_part += query[i]
+                    i += 1
+
+            # Add the last part
+            if current_part.strip():
+                parts.append(current_part.strip())
+
+            # Process the parts
+            current_operator = "AND"  # Default operator
+            current_clause = []
+
+            for part in parts:
+                if part == "AND":
                     # Process the current clause with the current operator
                     if current_clause:
                         process_clause(current_clause, current_operator, bool_query)
                         current_clause = []
                     current_operator = "AND"
-                elif token == "OR":
+                elif part == "OR":
                     # Process the current clause with the current operator
                     if current_clause:
                         process_clause(current_clause, current_operator, bool_query)
                         current_clause = []
                     current_operator = "OR"
-                elif token == "NOT":
+                elif part == "NOT":
                     # Process the current clause with the current operator
                     if current_clause:
                         process_clause(current_clause, current_operator, bool_query)
                         current_clause = []
                     current_operator = "NOT"
                 else:
-                    # This is a field:value pair or part of one
-                    current_clause.append(token)
-
-                i += 1
+                    # This is a field:value pair
+                    current_clause.append(part)
 
             # Process any remaining clause
             if current_clause:
@@ -181,12 +222,14 @@ def resolve_search_financial_instruments(_, info, query=None, id=None):
 
 def process_clause(clause, operator, bool_query):
     """Process a clause (field:value) with the given operator and add it to the bool query."""
-    # Join the tokens back into a string
-    clause_str = " ".join(clause)
+    # In the new implementation, each clause is already a complete field:value pair string
+    clause_str = clause[0] if isinstance(clause, list) else clause
 
     # Split by : to get field and value
     if ":" in clause_str:
         field, value = clause_str.split(":", 1)
+        field = field.strip()
+        value = value.strip()
 
         # Handle wildcards
         if "*" in value or "?" in value:
