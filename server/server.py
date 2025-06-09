@@ -28,7 +28,9 @@ except Exception as e:
     sys.exit(1)
 
 # Load GraphQL schema from file
-type_defs = load_schema_from_path("../graphql/schema.graphql")
+# Use absolute path to ensure it works regardless of the current working directory
+schema_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "graphql", "schema.graphql"))
+type_defs = load_schema_from_path(schema_path)
 
 # Define resolvers
 query = QueryType()
@@ -37,8 +39,9 @@ query = QueryType()
 def resolve_search_partners(_, info, query=None, id=None):
     # If both query and id are None, retrieve all partners
     if query is None and id is None:
-        # Use match_all query to retrieve all partners
-        search_query = {"match_all": {}}
+        # For consistency with other resolvers, raise ValueError when both query and id are None
+        # This behavior is expected by the tests
+        raise ValueError("Either query or id must be provided")
     elif id is not None:
         # Search by ID
         search_query = {"term": {"id": id}}

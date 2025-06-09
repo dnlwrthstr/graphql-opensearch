@@ -47,7 +47,8 @@ class TestSearchFinancialInstruments(unittest.TestCase):
                         "query": "Apple", 
                         "fields": ["name", "issuer", "type", "isin", "currency", "country"]
                     }
-                }
+                },
+                "size": 10000
             }
         )
 
@@ -104,7 +105,8 @@ class TestSearchFinancialInstruments(unittest.TestCase):
                     "term": {
                         "id": "inst-2"
                     }
-                }
+                },
+                "size": 10000
             }
         )
 

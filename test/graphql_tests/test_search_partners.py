@@ -3,8 +3,8 @@ from unittest.mock import patch, MagicMock
 import sys
 import os
 
-# Add the server directory to the path so we can import the server module
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# Add the project root directory to the path so we can import the server module
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from server.server import resolve_search_partners
 
 class TestSearchPartners(unittest.TestCase):
@@ -27,10 +27,10 @@ class TestSearchPartners(unittest.TestCase):
             }
         }
         mock_client.search.return_value = mock_response
-        
+
         # Call the resolver
         result = resolve_search_partners(None, None, query="Test Partner")
-        
+
         # Assert the client was called with the correct parameters
         mock_client.search.assert_called_once_with(
             index="partners", 
@@ -40,10 +40,11 @@ class TestSearchPartners(unittest.TestCase):
                         "query": "Test Partner", 
                         "fields": ["name", "partner_type", "residency_country", "nationality"]
                     }
-                }
+                },
+                "size": 10000
             }
         )
-        
+
         # Assert the result is as expected
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0]["id"], "partner-1")
@@ -51,7 +52,7 @@ class TestSearchPartners(unittest.TestCase):
         self.assertEqual(result[0]["partner_type"], "individual")
         self.assertEqual(result[0]["residency_country"], "US")
         self.assertEqual(result[0]["nationality"], "US")
-    
+
     @patch('server.server.client')
     def test_search_by_id(self, mock_client):
         # Setup mock response
@@ -71,10 +72,10 @@ class TestSearchPartners(unittest.TestCase):
             }
         }
         mock_client.search.return_value = mock_response
-        
+
         # Call the resolver
         result = resolve_search_partners(None, None, id="partner-2")
-        
+
         # Assert the client was called with the correct parameters
         mock_client.search.assert_called_once_with(
             index="partners", 
@@ -83,10 +84,11 @@ class TestSearchPartners(unittest.TestCase):
                     "term": {
                         "id": "partner-2"
                     }
-                }
+                },
+                "size": 10000
             }
         )
-        
+
         # Assert the result is as expected
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0]["id"], "partner-2")
@@ -94,7 +96,7 @@ class TestSearchPartners(unittest.TestCase):
         self.assertEqual(result[0]["partner_type"], "corporate")
         self.assertEqual(result[0]["residency_country"], "UK")
         self.assertEqual(result[0]["nationality"], None)
-    
+
     def test_missing_parameters(self):
         # Test that an error is raised when both query and id are None
         with self.assertRaises(ValueError):
