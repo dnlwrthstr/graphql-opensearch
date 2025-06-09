@@ -54,6 +54,56 @@ const GET_LEGAL_ENTITY_TYPE_VALUES = gql`
   }
 `;
 
+// GraphQL query for getting PEP flag values
+const GET_PEP_FLAG_VALUES = gql`
+  query GetPepFlagValues {
+    getPepFlagValues {
+      value
+      count
+    }
+  }
+`;
+
+// GraphQL query for getting KYC status values
+const GET_KYC_STATUS_VALUES = gql`
+  query GetKycStatusValues {
+    getKycStatusValues {
+      value
+      count
+    }
+  }
+`;
+
+// GraphQL query for getting sanctions screened values
+const GET_SANCTIONS_SCREENED_VALUES = gql`
+  query GetSanctionsScreenedValues {
+    getSanctionsScreenedValues {
+      value
+      count
+    }
+  }
+`;
+
+// GraphQL query for getting risk level values
+const GET_RISK_LEVEL_VALUES = gql`
+  query GetRiskLevelValues {
+    getRiskLevelValues {
+      value
+      count
+    }
+  }
+`;
+
+// GraphQL query for getting account type values
+const GET_ACCOUNT_TYPE_VALUES = gql`
+  query GetAccountTypeValues {
+    getAccountTypeValues {
+      value
+      count
+    }
+  }
+`;
+
 function AdvancedPartnerSearch() {
   const [searchParams, setSearchParams] = useState({
     name: '*',
@@ -106,12 +156,42 @@ function AdvancedPartnerSearch() {
     fetchPolicy: "network-only" // Don't cache this query
   });
 
+  // Query for PEP flag values
+  const { loading: loadingPepFlags, error: errorPepFlags, data: pepFlagData, refetch: refetchPepFlags } = useQuery(GET_PEP_FLAG_VALUES, {
+    fetchPolicy: "network-only" // Don't cache this query
+  });
+
+  // Query for KYC status values
+  const { loading: loadingKycStatuses, error: errorKycStatuses, data: kycStatusData, refetch: refetchKycStatuses } = useQuery(GET_KYC_STATUS_VALUES, {
+    fetchPolicy: "network-only" // Don't cache this query
+  });
+
+  // Query for sanctions screened values
+  const { loading: loadingSanctionsScreened, error: errorSanctionsScreened, data: sanctionsScreenedData, refetch: refetchSanctionsScreened } = useQuery(GET_SANCTIONS_SCREENED_VALUES, {
+    fetchPolicy: "network-only" // Don't cache this query
+  });
+
+  // Query for risk level values
+  const { loading: loadingRiskLevels, error: errorRiskLevels, data: riskLevelData, refetch: refetchRiskLevels } = useQuery(GET_RISK_LEVEL_VALUES, {
+    fetchPolicy: "network-only" // Don't cache this query
+  });
+
+  // Query for account type values
+  const { loading: loadingAccountTypes, error: errorAccountTypes, data: accountTypeData, refetch: refetchAccountTypes } = useQuery(GET_ACCOUNT_TYPE_VALUES, {
+    fetchPolicy: "network-only" // Don't cache this query
+  });
+
   // Ensure data is loaded on component mount
   useEffect(() => {
     refetchNationalities();
     refetchResidencies();
     refetchPartnerTypes();
     refetchLegalEntityTypes();
+    refetchPepFlags();
+    refetchKycStatuses();
+    refetchSanctionsScreened();
+    refetchRiskLevels();
+    refetchAccountTypes();
   }, []);
 
   const handleInputChange = (e) => {
@@ -271,9 +351,16 @@ function AdvancedPartnerSearch() {
                 onChange={handleInputChange}
               >
                 <option value="">No Selection</option>
-                <option value="true">Yes</option>
-                <option value="false">No</option>
+                {!loadingPepFlags && !errorPepFlags && pepFlagData && pepFlagData.getPepFlagValues && 
+                  pepFlagData.getPepFlagValues.map(flag => (
+                    <option key={flag.value} value={flag.value}>
+                      {flag.value === "true" ? "Yes" : "No"} ({flag.count})
+                    </option>
+                  ))
+                }
               </select>
+              {loadingPepFlags && <span className="loading-indicator">Loading...</span>}
+              {errorPepFlags && <span className="error-message">Error loading PEP flag values</span>}
             </div>
           </div>
 
@@ -287,10 +374,16 @@ function AdvancedPartnerSearch() {
                 onChange={handleInputChange}
               >
                 <option value="">Select...</option>
-                <option value="pending">Pending</option>
-                <option value="verified">Verified</option>
-                <option value="rejected">Rejected</option>
+                {!loadingKycStatuses && !errorKycStatuses && kycStatusData && kycStatusData.getKycStatusValues && 
+                  kycStatusData.getKycStatusValues.map(status => (
+                    <option key={status.value} value={status.value}>
+                      {status.value} ({status.count})
+                    </option>
+                  ))
+                }
               </select>
+              {loadingKycStatuses && <span className="loading-indicator">Loading...</span>}
+              {errorKycStatuses && <span className="error-message">Error loading KYC status values</span>}
             </div>
 
             <div className="input-group">
@@ -301,9 +394,16 @@ function AdvancedPartnerSearch() {
                 onChange={handleInputChange}
               >
                 <option value="">No Selection</option>
-                <option value="true">Yes</option>
-                <option value="false">No</option>
+                {!loadingSanctionsScreened && !errorSanctionsScreened && sanctionsScreenedData && sanctionsScreenedData.getSanctionsScreenedValues && 
+                  sanctionsScreenedData.getSanctionsScreenedValues.map(status => (
+                    <option key={status.value} value={status.value}>
+                      {status.value === "true" ? "Yes" : "No"} ({status.count})
+                    </option>
+                  ))
+                }
               </select>
+              {loadingSanctionsScreened && <span className="loading-indicator">Loading...</span>}
+              {errorSanctionsScreened && <span className="error-message">Error loading sanctions screened values</span>}
             </div>
 
             <div className="input-group">
@@ -314,10 +414,16 @@ function AdvancedPartnerSearch() {
                 onChange={handleInputChange}
               >
                 <option value="">Select...</option>
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
+                {!loadingRiskLevels && !errorRiskLevels && riskLevelData && riskLevelData.getRiskLevelValues && 
+                  riskLevelData.getRiskLevelValues.map(level => (
+                    <option key={level.value} value={level.value}>
+                      {level.value} ({level.count})
+                    </option>
+                  ))
+                }
               </select>
+              {loadingRiskLevels && <span className="loading-indicator">Loading...</span>}
+              {errorRiskLevels && <span className="error-message">Error loading risk level values</span>}
             </div>
           </div>
 
@@ -331,10 +437,16 @@ function AdvancedPartnerSearch() {
                 onChange={handleInputChange}
               >
                 <option value="">Select...</option>
-                <option value="retail">Retail</option>
-                <option value="private">Private</option>
-                <option value="corporate">Corporate</option>
+                {!loadingAccountTypes && !errorAccountTypes && accountTypeData && accountTypeData.getAccountTypeValues && 
+                  accountTypeData.getAccountTypeValues.map(type => (
+                    <option key={type.value} value={type.value}>
+                      {type.value} ({type.count})
+                    </option>
+                  ))
+                }
               </select>
+              {loadingAccountTypes && <span className="loading-indicator">Loading...</span>}
+              {errorAccountTypes && <span className="error-message">Error loading account type values</span>}
             </div>
           </div>
         </div>

@@ -95,6 +95,11 @@ type Query {
     getUniqueCountryValues(field: String!, filter: String): [CountryValue!]!
     getPartnerTypeValues: [CountryValue!]!
     getLegalEntityTypeValues: [CountryValue!]!
+    getPepFlagValues: [CountryValue!]!
+    getKycStatusValues: [CountryValue!]!
+    getSanctionsScreenedValues: [CountryValue!]!
+    getRiskLevelValues: [CountryValue!]!
+    getAccountTypeValues: [CountryValue!]!
     getInstrumentTypeCounts: [TypeCount!]!
     getInstrumentIssuerCounts: [TypeCount!]!
     getInstrumentCountryCounts: [TypeCount!]!

@@ -43,6 +43,21 @@ def seed_partners():
                 },
                 "legal_entity_type": {
                     "type": "keyword"
+                },
+                "pep_flag": {
+                    "type": "boolean"
+                },
+                "kyc_status": {
+                    "type": "keyword"
+                },
+                "sanctions_screened": {
+                    "type": "boolean"
+                },
+                "risk_level": {
+                    "type": "keyword"
+                },
+                "account_type": {
+                    "type": "keyword"
                 }
             }
         }

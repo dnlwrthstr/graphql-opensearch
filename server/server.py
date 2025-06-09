@@ -778,6 +778,246 @@ def resolve_legal_entity_type_values(_, info):
 # Register the resolver for getLegalEntityTypeValues
 query.set_field("getLegalEntityTypeValues", resolve_legal_entity_type_values)
 
+# Define resolver for getPepFlagValues
+def resolve_pep_flag_values(_, info):
+    """
+    Resolver for getPepFlagValues query.
+    Returns unique values for pep_flag field with counts.
+    """
+    try:
+        # Build the query
+        query_body = {
+            "size": 0,  # We only want aggregation results, not documents
+            "aggs": {
+                "unique_values": {
+                    "terms": {
+                        "field": "pep_flag",
+                        "size": 2,  # Only true/false values
+                        "missing": "null"  # Include documents where the field is missing
+                    }
+                }
+            }
+        }
+
+        # Execute the query
+        res = client.search(index="partners", body=query_body)
+
+        # Extract the buckets from the aggregation results
+        buckets = res["aggregations"]["unique_values"]["buckets"]
+
+        # Convert the buckets to the expected format
+        result = []
+        for bucket in buckets:
+            # Skip null values
+            if bucket["key"] == "null":
+                continue
+
+            # Add the value and count to the result
+            result.append({
+                "value": str(bucket["key"]).lower(),  # Convert boolean to string "true"/"false"
+                "count": bucket["doc_count"]
+            })
+
+        return result
+    except Exception as e:
+        print(f"Error retrieving pep flag values: {e}")
+        return []
+
+# Register the resolver for getPepFlagValues
+query.set_field("getPepFlagValues", resolve_pep_flag_values)
+
+# Define resolver for getKycStatusValues
+def resolve_kyc_status_values(_, info):
+    """
+    Resolver for getKycStatusValues query.
+    Returns unique values for kyc_status field with counts.
+    """
+    try:
+        # Build the query
+        query_body = {
+            "size": 0,  # We only want aggregation results, not documents
+            "aggs": {
+                "unique_values": {
+                    "terms": {
+                        "field": "kyc_status",
+                        "size": 10,  # Get up to 10 unique values
+                        "missing": "null"  # Include documents where the field is missing
+                    }
+                }
+            }
+        }
+
+        # Execute the query
+        res = client.search(index="partners", body=query_body)
+
+        # Extract the buckets from the aggregation results
+        buckets = res["aggregations"]["unique_values"]["buckets"]
+
+        # Convert the buckets to the expected format
+        result = []
+        for bucket in buckets:
+            # Skip null values
+            if bucket["key"] == "null":
+                continue
+
+            # Add the value and count to the result
+            result.append({
+                "value": bucket["key"],
+                "count": bucket["doc_count"]
+            })
+
+        return result
+    except Exception as e:
+        print(f"Error retrieving KYC status values: {e}")
+        return []
+
+# Register the resolver for getKycStatusValues
+query.set_field("getKycStatusValues", resolve_kyc_status_values)
+
+# Define resolver for getSanctionsScreenedValues
+def resolve_sanctions_screened_values(_, info):
+    """
+    Resolver for getSanctionsScreenedValues query.
+    Returns unique values for sanctions_screened field with counts.
+    """
+    try:
+        # Build the query
+        query_body = {
+            "size": 0,  # We only want aggregation results, not documents
+            "aggs": {
+                "unique_values": {
+                    "terms": {
+                        "field": "sanctions_screened",
+                        "size": 2,  # Only true/false values
+                        "missing": "null"  # Include documents where the field is missing
+                    }
+                }
+            }
+        }
+
+        # Execute the query
+        res = client.search(index="partners", body=query_body)
+
+        # Extract the buckets from the aggregation results
+        buckets = res["aggregations"]["unique_values"]["buckets"]
+
+        # Convert the buckets to the expected format
+        result = []
+        for bucket in buckets:
+            # Skip null values
+            if bucket["key"] == "null":
+                continue
+
+            # Add the value and count to the result
+            result.append({
+                "value": str(bucket["key"]).lower(),  # Convert boolean to string "true"/"false"
+                "count": bucket["doc_count"]
+            })
+
+        return result
+    except Exception as e:
+        print(f"Error retrieving sanctions screened values: {e}")
+        return []
+
+# Register the resolver for getSanctionsScreenedValues
+query.set_field("getSanctionsScreenedValues", resolve_sanctions_screened_values)
+
+# Define resolver for getRiskLevelValues
+def resolve_risk_level_values(_, info):
+    """
+    Resolver for getRiskLevelValues query.
+    Returns unique values for risk_level field with counts.
+    """
+    try:
+        # Build the query
+        query_body = {
+            "size": 0,  # We only want aggregation results, not documents
+            "aggs": {
+                "unique_values": {
+                    "terms": {
+                        "field": "risk_level",
+                        "size": 10,  # Get up to 10 unique values
+                        "missing": "null"  # Include documents where the field is missing
+                    }
+                }
+            }
+        }
+
+        # Execute the query
+        res = client.search(index="partners", body=query_body)
+
+        # Extract the buckets from the aggregation results
+        buckets = res["aggregations"]["unique_values"]["buckets"]
+
+        # Convert the buckets to the expected format
+        result = []
+        for bucket in buckets:
+            # Skip null values
+            if bucket["key"] == "null":
+                continue
+
+            # Add the value and count to the result
+            result.append({
+                "value": bucket["key"],
+                "count": bucket["doc_count"]
+            })
+
+        return result
+    except Exception as e:
+        print(f"Error retrieving risk level values: {e}")
+        return []
+
+# Register the resolver for getRiskLevelValues
+query.set_field("getRiskLevelValues", resolve_risk_level_values)
+
+# Define resolver for getAccountTypeValues
+def resolve_account_type_values(_, info):
+    """
+    Resolver for getAccountTypeValues query.
+    Returns unique values for account_type field with counts.
+    """
+    try:
+        # Build the query
+        query_body = {
+            "size": 0,  # We only want aggregation results, not documents
+            "aggs": {
+                "unique_values": {
+                    "terms": {
+                        "field": "account_type",
+                        "size": 10,  # Get up to 10 unique values
+                        "missing": "null"  # Include documents where the field is missing
+                    }
+                }
+            }
+        }
+
+        # Execute the query
+        res = client.search(index="partners", body=query_body)
+
+        # Extract the buckets from the aggregation results
+        buckets = res["aggregations"]["unique_values"]["buckets"]
+
+        # Convert the buckets to the expected format
+        result = []
+        for bucket in buckets:
+            # Skip null values
+            if bucket["key"] == "null":
+                continue
+
+            # Add the value and count to the result
+            result.append({
+                "value": bucket["key"],
+                "count": bucket["doc_count"]
+            })
+
+        return result
+    except Exception as e:
+        print(f"Error retrieving account type values: {e}")
+        return []
+
+# Register the resolver for getAccountTypeValues
+query.set_field("getAccountTypeValues", resolve_account_type_values)
+
 # Define resolver for getInstrumentTypeCounts
 def resolve_instrument_type_counts(_, info):
     """
