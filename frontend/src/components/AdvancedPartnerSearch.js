@@ -305,11 +305,12 @@ function AdvancedPartnerSearch() {
       {error && <p>Error: {error.message}</p>}
 
       <div className="results">
-        <h3>Search Results {data && data.searchPartners ? `(${data.searchPartners.length} partners found)` : ''}</h3>
-
         <div className="partner-results-table-container">
           <table className="partner-results-table">
             <thead>
+              <tr className="results-header">
+                <th colSpan="11">Search Results {data && data.searchPartners ? `(${data.searchPartners.length} Partners found)` : ''}</th>
+              </tr>
               <tr>
                 <th>Name</th>
                 <th>Type</th>

@@ -547,11 +547,12 @@ function AdvancedInstrumentSearch() {
       {error && <p>Error: {error.message}</p>}
 
       <div className="results">
-        <h3>Search Results {data && data.searchFinancialInstruments ? `(${data.searchFinancialInstruments.length} instruments found)` : ''}</h3>
-
         <div className="instrument-results-table-container">
           <table className="instrument-results-table">
             <thead>
+              <tr className="results-header">
+                <th colSpan="10">Search Results {data && data.searchFinancialInstruments ? `(${data.searchFinancialInstruments.length} Instruments found)` : ''}</th>
+              </tr>
               <tr>
                 <th>Name</th>
                 <th>ISIN</th>

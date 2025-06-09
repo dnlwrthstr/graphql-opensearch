@@ -478,7 +478,9 @@ li:last-child {
 
 .partner-results-table-container, .instrument-results-table-container {
   overflow-x: auto;
+  overflow-y: auto;
   max-width: 100%;
+  max-height: 500px; /* Set a fixed height to enable vertical scrolling */
 }
 
 .partner-results-table, .instrument-results-table {
@@ -495,12 +497,44 @@ li:last-child {
   border-bottom: 1px solid #ddd;
 }
 
+/* General styles for all table headers */
 .partner-results-table th, .instrument-results-table th {
   background-color: #f2f2f2;
   font-weight: bold;
+  position: sticky;
+  z-index: 1;
+}
+
+/* First row of headers (column names) */
+.partner-results-table thead tr:nth-child(2) th, 
+.instrument-results-table thead tr:nth-child(2) th {
+  top: 43px; /* Height of the results header */
+}
+
+/* Results header row (first row) */
+.partner-results-table thead tr:first-child th, 
+.instrument-results-table thead tr:first-child th {
+  top: 0;
+  z-index: 2; /* Higher z-index to appear above the column headers */
 }
 
 .partner-results-table tr:hover, .instrument-results-table tr:hover {
+  background-color: #f9f9f9;
+}
+
+/* Results header styling */
+.results-header th {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  border-bottom: 2px solid #4CAF50;
+  padding: 12px 10px;
+  text-align: left;
+  background-color: #f9f9f9;
+}
+
+.partner-results-table tr.results-header:hover,
+.instrument-results-table tr.results-header:hover {
   background-color: #f9f9f9;
 }
 
