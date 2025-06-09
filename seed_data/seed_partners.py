@@ -37,6 +37,12 @@ def seed_partners():
                 },
                 "residency_country": {
                     "type": "keyword"
+                },
+                "partner_type": {
+                    "type": "keyword"
+                },
+                "legal_entity_type": {
+                    "type": "keyword"
                 }
             }
         }

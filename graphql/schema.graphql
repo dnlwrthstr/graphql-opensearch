@@ -93,6 +93,8 @@ type Query {
     autocompleteInstrumentName(query: String!): [InstrumentSuggestion!]!
     getPortfoliosByInstrument(instrument_id: ID!): [Portfolio!]!
     getUniqueCountryValues(field: String!, filter: String): [CountryValue!]!
+    getPartnerTypeValues: [CountryValue!]!
+    getLegalEntityTypeValues: [CountryValue!]!
     getInstrumentTypeCounts: [TypeCount!]!
     getInstrumentIssuerCounts: [TypeCount!]!
     getInstrumentCountryCounts: [TypeCount!]!

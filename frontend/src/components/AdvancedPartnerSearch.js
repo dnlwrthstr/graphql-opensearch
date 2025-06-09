@@ -34,6 +34,26 @@ const GET_UNIQUE_COUNTRY_VALUES = gql`
   }
 `;
 
+// GraphQL query for getting partner type values
+const GET_PARTNER_TYPE_VALUES = gql`
+  query GetPartnerTypeValues {
+    getPartnerTypeValues {
+      value
+      count
+    }
+  }
+`;
+
+// GraphQL query for getting legal entity type values
+const GET_LEGAL_ENTITY_TYPE_VALUES = gql`
+  query GetLegalEntityTypeValues {
+    getLegalEntityTypeValues {
+      value
+      count
+    }
+  }
+`;
+
 function AdvancedPartnerSearch() {
   const [searchParams, setSearchParams] = useState({
     name: '*',
@@ -76,10 +96,22 @@ function AdvancedPartnerSearch() {
     fetchPolicy: "network-only" // Don't cache this query
   });
 
+  // Query for partner type values
+  const { loading: loadingPartnerTypes, error: errorPartnerTypes, data: partnerTypeData, refetch: refetchPartnerTypes } = useQuery(GET_PARTNER_TYPE_VALUES, {
+    fetchPolicy: "network-only" // Don't cache this query
+  });
+
+  // Query for legal entity type values
+  const { loading: loadingLegalEntityTypes, error: errorLegalEntityTypes, data: legalEntityTypeData, refetch: refetchLegalEntityTypes } = useQuery(GET_LEGAL_ENTITY_TYPE_VALUES, {
+    fetchPolicy: "network-only" // Don't cache this query
+  });
+
   // Ensure data is loaded on component mount
   useEffect(() => {
     refetchNationalities();
     refetchResidencies();
+    refetchPartnerTypes();
+    refetchLegalEntityTypes();
   }, []);
 
   const handleInputChange = (e) => {
@@ -156,9 +188,16 @@ function AdvancedPartnerSearch() {
                 onChange={handleInputChange}
               >
                 <option value="">Select...</option>
-                <option value="individual">Individual</option>
-                <option value="entity">Entity</option>
+                {!loadingPartnerTypes && !errorPartnerTypes && partnerTypeData && partnerTypeData.getPartnerTypeValues && 
+                  partnerTypeData.getPartnerTypeValues.map(type => (
+                    <option key={type.value} value={type.value}>
+                      {type.value} ({type.count})
+                    </option>
+                  ))
+                }
               </select>
+              {loadingPartnerTypes && <span className="loading-indicator">Loading...</span>}
+              {errorPartnerTypes && <span className="error-message">Error loading partner types</span>}
             </div>
 
             <div className="input-group">
@@ -169,11 +208,16 @@ function AdvancedPartnerSearch() {
                 onChange={handleInputChange}
               >
                 <option value="">Select...</option>
-                <option value="individual">Individual</option>
-                <option value="corporation">Corporation</option>
-                <option value="trust">Trust</option>
-                <option value="foundation">Foundation</option>
+                {!loadingLegalEntityTypes && !errorLegalEntityTypes && legalEntityTypeData && legalEntityTypeData.getLegalEntityTypeValues && 
+                  legalEntityTypeData.getLegalEntityTypeValues.map(type => (
+                    <option key={type.value} value={type.value}>
+                      {type.value} ({type.count})
+                    </option>
+                  ))
+                }
               </select>
+              {loadingLegalEntityTypes && <span className="loading-indicator">Loading...</span>}
+              {errorLegalEntityTypes && <span className="error-message">Error loading legal entity types</span>}
             </div>
           </div>
 

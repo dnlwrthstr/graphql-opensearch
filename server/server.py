@@ -682,6 +682,102 @@ def resolve_unique_country_values(_, info, field, filter=None):
 # Register the resolver for getUniqueCountryValues
 query.set_field("getUniqueCountryValues", resolve_unique_country_values)
 
+# Define resolver for getPartnerTypeValues
+def resolve_partner_type_values(_, info):
+    """
+    Resolver for getPartnerTypeValues query.
+    Returns unique values for partner_type field with counts.
+    """
+    try:
+        # Build the query
+        query_body = {
+            "size": 0,  # We only want aggregation results, not documents
+            "aggs": {
+                "unique_values": {
+                    "terms": {
+                        "field": "partner_type",
+                        "size": 10,  # Get up to 10 unique values
+                        "missing": "null"  # Include documents where the field is missing
+                    }
+                }
+            }
+        }
+
+        # Execute the query
+        res = client.search(index="partners", body=query_body)
+
+        # Extract the buckets from the aggregation results
+        buckets = res["aggregations"]["unique_values"]["buckets"]
+
+        # Convert the buckets to the expected format
+        result = []
+        for bucket in buckets:
+            # Skip null values
+            if bucket["key"] == "null":
+                continue
+
+            # Add the value and count to the result
+            result.append({
+                "value": bucket["key"],
+                "count": bucket["doc_count"]
+            })
+
+        return result
+    except Exception as e:
+        print(f"Error retrieving partner type values: {e}")
+        return []
+
+# Register the resolver for getPartnerTypeValues
+query.set_field("getPartnerTypeValues", resolve_partner_type_values)
+
+# Define resolver for getLegalEntityTypeValues
+def resolve_legal_entity_type_values(_, info):
+    """
+    Resolver for getLegalEntityTypeValues query.
+    Returns unique values for legal_entity_type field with counts.
+    """
+    try:
+        # Build the query
+        query_body = {
+            "size": 0,  # We only want aggregation results, not documents
+            "aggs": {
+                "unique_values": {
+                    "terms": {
+                        "field": "legal_entity_type",
+                        "size": 10,  # Get up to 10 unique values
+                        "missing": "null"  # Include documents where the field is missing
+                    }
+                }
+            }
+        }
+
+        # Execute the query
+        res = client.search(index="partners", body=query_body)
+
+        # Extract the buckets from the aggregation results
+        buckets = res["aggregations"]["unique_values"]["buckets"]
+
+        # Convert the buckets to the expected format
+        result = []
+        for bucket in buckets:
+            # Skip null values
+            if bucket["key"] == "null":
+                continue
+
+            # Add the value and count to the result
+            result.append({
+                "value": bucket["key"],
+                "count": bucket["doc_count"]
+            })
+
+        return result
+    except Exception as e:
+        print(f"Error retrieving legal entity type values: {e}")
+        return []
+
+# Register the resolver for getLegalEntityTypeValues
+query.set_field("getLegalEntityTypeValues", resolve_legal_entity_type_values)
+
 # Define resolver for getInstrumentTypeCounts
 def resolve_instrument_type_counts(_, info):
     """
