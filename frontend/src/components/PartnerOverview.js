@@ -65,7 +65,12 @@ function PartnerOverview() {
                 data={legalEntityTypeData.getLegalEntityTypeValues}
                 cx="50%"
                 cy="50%"
-                labelLine={false}
+                labelLine={true}
+                label={{
+                  fontSize: 10,
+                  fill: '#333',
+                  position: 'outside'
+                }}
                 outerRadius={80}
                 innerRadius={40}
                 fill="#8884d8"
@@ -106,7 +111,12 @@ function PartnerOverview() {
                 data={nationalityData.getUniqueCountryValues}
                 cx="50%"
                 cy="50%"
-                labelLine={false}
+                labelLine={true}
+                label={{
+                  fontSize: 10,
+                  fill: '#333',
+                  position: 'outside'
+                }}
                 outerRadius={80}
                 innerRadius={40}
                 fill="#8884d8"

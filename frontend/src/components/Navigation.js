@@ -18,7 +18,7 @@ function Navigation() {
 
   return (
     <nav>
-      <h2>Bank Data Search</h2>
+      <h2>Navigation</h2>
       <ul className="nav-menu">
         <li className="menu-item">
           <div 

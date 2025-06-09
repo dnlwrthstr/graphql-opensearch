@@ -203,6 +203,8 @@ button:hover {
   color: #333;
   border-bottom: 2px solid #4CAF50;
   padding-bottom: 8px;
+  font-size: 16px;
+  font-weight: 500;
 }
 
 ul {
@@ -321,8 +323,9 @@ li:last-child {
   border-bottom: 2px solid #4CAF50;
   padding-bottom: 8px;
   margin-bottom: 15px;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 /* Always keep charts stacked vertically regardless of screen size */
@@ -368,7 +371,7 @@ li:last-child {
   color: #333;
   border-bottom: 2px solid #4CAF50;
   padding-bottom: 8px;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 500;
 }
 
@@ -424,7 +427,7 @@ li:last-child {
   color: #333;
   border-bottom: 2px solid #4CAF50;
   padding-bottom: 8px;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 500;
 }
 
