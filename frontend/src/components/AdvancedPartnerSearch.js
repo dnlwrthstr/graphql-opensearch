@@ -262,40 +262,56 @@ function AdvancedPartnerSearch() {
 
             <div className="input-group">
               <label>Partner Type:</label>
-              <select
-                name="partner_type"
-                value={searchParams.partner_type}
-                onChange={handleInputChange}
-              >
-                <option value="">Select...</option>
-                {!loadingPartnerTypes && !errorPartnerTypes && partnerTypeData && partnerTypeData.getPartnerTypeValues && 
+              {!loadingPartnerTypes && !errorPartnerTypes && partnerTypeData && partnerTypeData.getPartnerTypeValues && 
+                (partnerTypeData.getPartnerTypeValues.length > 0 ? (
+                  <select
+                    name="partner_type"
+                    value={searchParams.partner_type}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Select...</option>
+                    {partnerTypeData.getPartnerTypeValues.map(type => (
+                      <option key={type.value} value={type.value}>
+                        {type.value} ({type.count})
+                      </option>
+                    ))}
+                  </select>
+                ) : (
                   partnerTypeData.getPartnerTypeValues.map(type => (
-                    <option key={type.value} value={type.value}>
+                    <div key={type.value} className="static-value">
                       {type.value} ({type.count})
-                    </option>
+                    </div>
                   ))
-                }
-              </select>
+                ))
+              }
               {loadingPartnerTypes && <span className="loading-indicator">Loading...</span>}
               {errorPartnerTypes && <span className="error-message">Error loading partner types</span>}
             </div>
 
             <div className="input-group">
               <label>Legal Entity Type:</label>
-              <select
-                name="legal_entity_type"
-                value={searchParams.legal_entity_type}
-                onChange={handleInputChange}
-              >
-                <option value="">Select...</option>
-                {!loadingLegalEntityTypes && !errorLegalEntityTypes && legalEntityTypeData && legalEntityTypeData.getLegalEntityTypeValues && 
+              {!loadingLegalEntityTypes && !errorLegalEntityTypes && legalEntityTypeData && legalEntityTypeData.getLegalEntityTypeValues && 
+                (legalEntityTypeData.getLegalEntityTypeValues.length > 0 ? (
+                  <select
+                    name="legal_entity_type"
+                    value={searchParams.legal_entity_type}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Select...</option>
+                    {legalEntityTypeData.getLegalEntityTypeValues.map(type => (
+                      <option key={type.value} value={type.value}>
+                        {type.value} ({type.count})
+                      </option>
+                    ))}
+                  </select>
+                ) : (
                   legalEntityTypeData.getLegalEntityTypeValues.map(type => (
-                    <option key={type.value} value={type.value}>
+                    <div key={type.value} className="static-value">
                       {type.value} ({type.count})
-                    </option>
+                    </div>
                   ))
-                }
-              </select>
+                ))
+              }
               {loadingLegalEntityTypes && <span className="loading-indicator">Loading...</span>}
               {errorLegalEntityTypes && <span className="error-message">Error loading legal entity types</span>}
             </div>
@@ -305,60 +321,84 @@ function AdvancedPartnerSearch() {
           <div className="search-row">
             <div className="input-group">
               <label>Nationality:</label>
-              <select
-                name="nationality"
-                value={searchParams.nationality}
-                onChange={handleInputChange}
-              >
-                <option value="">Select...</option>
-                {!loadingNationalities && !errorNationalities && nationalityData && nationalityData.getUniqueCountryValues && 
+              {!loadingNationalities && !errorNationalities && nationalityData && nationalityData.getUniqueCountryValues && 
+                (nationalityData.getUniqueCountryValues.length > 0 ? (
+                  <select
+                    name="nationality"
+                    value={searchParams.nationality}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Select...</option>
+                    {nationalityData.getUniqueCountryValues.map(country => (
+                      <option key={country.value} value={country.value}>
+                        {country.value} ({country.count})
+                      </option>
+                    ))}
+                  </select>
+                ) : (
                   nationalityData.getUniqueCountryValues.map(country => (
-                    <option key={country.value} value={country.value}>
+                    <div key={country.value} className="static-value">
                       {country.value} ({country.count})
-                    </option>
+                    </div>
                   ))
-                }
-              </select>
+                ))
+              }
               {loadingNationalities && <span className="loading-indicator">Loading...</span>}
               {errorNationalities && <span className="error-message">Error loading countries</span>}
             </div>
 
             <div className="input-group">
               <label>Residency Country:</label>
-              <select
-                name="residency_country"
-                value={searchParams.residency_country}
-                onChange={handleInputChange}
-              >
-                <option value="">Select...</option>
-                {!loadingResidencies && !errorResidencies && residencyData && residencyData.getUniqueCountryValues && 
+              {!loadingResidencies && !errorResidencies && residencyData && residencyData.getUniqueCountryValues && 
+                (residencyData.getUniqueCountryValues.length > 0 ? (
+                  <select
+                    name="residency_country"
+                    value={searchParams.residency_country}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Select...</option>
+                    {residencyData.getUniqueCountryValues.map(country => (
+                      <option key={country.value} value={country.value}>
+                        {country.value} ({country.count})
+                      </option>
+                    ))}
+                  </select>
+                ) : (
                   residencyData.getUniqueCountryValues.map(country => (
-                    <option key={country.value} value={country.value}>
+                    <div key={country.value} className="static-value">
                       {country.value} ({country.count})
-                    </option>
+                    </div>
                   ))
-                }
-              </select>
+                ))
+              }
               {loadingResidencies && <span className="loading-indicator">Loading...</span>}
               {errorResidencies && <span className="error-message">Error loading countries</span>}
             </div>
 
             <div className="input-group">
               <label>PEP Flag:</label>
-              <select
-                name="pep_flag"
-                value={searchParams.pep_flag}
-                onChange={handleInputChange}
-              >
-                <option value="">No Selection</option>
-                {!loadingPepFlags && !errorPepFlags && pepFlagData && pepFlagData.getPepFlagValues && 
+              {!loadingPepFlags && !errorPepFlags && pepFlagData && pepFlagData.getPepFlagValues && 
+                (pepFlagData.getPepFlagValues.length > 0 ? (
+                  <select
+                    name="pep_flag"
+                    value={searchParams.pep_flag}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">No Selection</option>
+                    {pepFlagData.getPepFlagValues.map(flag => (
+                      <option key={flag.value} value={flag.value}>
+                        {flag.value === "true" ? "Yes" : "No"} ({flag.count})
+                      </option>
+                    ))}
+                  </select>
+                ) : (
                   pepFlagData.getPepFlagValues.map(flag => (
-                    <option key={flag.value} value={flag.value}>
+                    <div key={flag.value} className="static-value">
                       {flag.value === "true" ? "Yes" : "No"} ({flag.count})
-                    </option>
+                    </div>
                   ))
-                }
-              </select>
+                ))
+              }
               {loadingPepFlags && <span className="loading-indicator">Loading...</span>}
               {errorPepFlags && <span className="error-message">Error loading PEP flag values</span>}
             </div>
@@ -368,60 +408,84 @@ function AdvancedPartnerSearch() {
           <div className="search-row">
             <div className="input-group">
               <label>KYC Status:</label>
-              <select
-                name="kyc_status"
-                value={searchParams.kyc_status}
-                onChange={handleInputChange}
-              >
-                <option value="">Select...</option>
-                {!loadingKycStatuses && !errorKycStatuses && kycStatusData && kycStatusData.getKycStatusValues && 
+              {!loadingKycStatuses && !errorKycStatuses && kycStatusData && kycStatusData.getKycStatusValues && 
+                (kycStatusData.getKycStatusValues.length > 0 ? (
+                  <select
+                    name="kyc_status"
+                    value={searchParams.kyc_status}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Select...</option>
+                    {kycStatusData.getKycStatusValues.map(status => (
+                      <option key={status.value} value={status.value}>
+                        {status.value} ({status.count})
+                      </option>
+                    ))}
+                  </select>
+                ) : (
                   kycStatusData.getKycStatusValues.map(status => (
-                    <option key={status.value} value={status.value}>
+                    <div key={status.value} className="static-value">
                       {status.value} ({status.count})
-                    </option>
+                    </div>
                   ))
-                }
-              </select>
+                ))
+              }
               {loadingKycStatuses && <span className="loading-indicator">Loading...</span>}
               {errorKycStatuses && <span className="error-message">Error loading KYC status values</span>}
             </div>
 
             <div className="input-group">
               <label>Sanctions Screened:</label>
-              <select
-                name="sanctions_screened"
-                value={searchParams.sanctions_screened}
-                onChange={handleInputChange}
-              >
-                <option value="">No Selection</option>
-                {!loadingSanctionsScreened && !errorSanctionsScreened && sanctionsScreenedData && sanctionsScreenedData.getSanctionsScreenedValues && 
+              {!loadingSanctionsScreened && !errorSanctionsScreened && sanctionsScreenedData && sanctionsScreenedData.getSanctionsScreenedValues && 
+                (sanctionsScreenedData.getSanctionsScreenedValues.length > 0 ? (
+                  <select
+                    name="sanctions_screened"
+                    value={searchParams.sanctions_screened}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">No Selection</option>
+                    {sanctionsScreenedData.getSanctionsScreenedValues.map(status => (
+                      <option key={status.value} value={status.value}>
+                        {status.value === "true" ? "Yes" : "No"} ({status.count})
+                      </option>
+                    ))}
+                  </select>
+                ) : (
                   sanctionsScreenedData.getSanctionsScreenedValues.map(status => (
-                    <option key={status.value} value={status.value}>
+                    <div key={status.value} className="static-value">
                       {status.value === "true" ? "Yes" : "No"} ({status.count})
-                    </option>
+                    </div>
                   ))
-                }
-              </select>
+                ))
+              }
               {loadingSanctionsScreened && <span className="loading-indicator">Loading...</span>}
               {errorSanctionsScreened && <span className="error-message">Error loading sanctions screened values</span>}
             </div>
 
             <div className="input-group">
               <label>Risk Level:</label>
-              <select
-                name="risk_level"
-                value={searchParams.risk_level}
-                onChange={handleInputChange}
-              >
-                <option value="">Select...</option>
-                {!loadingRiskLevels && !errorRiskLevels && riskLevelData && riskLevelData.getRiskLevelValues && 
+              {!loadingRiskLevels && !errorRiskLevels && riskLevelData && riskLevelData.getRiskLevelValues && 
+                (riskLevelData.getRiskLevelValues.length > 0 ? (
+                  <select
+                    name="risk_level"
+                    value={searchParams.risk_level}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Select...</option>
+                    {riskLevelData.getRiskLevelValues.map(level => (
+                      <option key={level.value} value={level.value}>
+                        {level.value} ({level.count})
+                      </option>
+                    ))}
+                  </select>
+                ) : (
                   riskLevelData.getRiskLevelValues.map(level => (
-                    <option key={level.value} value={level.value}>
+                    <div key={level.value} className="static-value">
                       {level.value} ({level.count})
-                    </option>
+                    </div>
                   ))
-                }
-              </select>
+                ))
+              }
               {loadingRiskLevels && <span className="loading-indicator">Loading...</span>}
               {errorRiskLevels && <span className="error-message">Error loading risk level values</span>}
             </div>
@@ -431,20 +495,28 @@ function AdvancedPartnerSearch() {
           <div className="search-row">
             <div className="input-group">
               <label>Account Type:</label>
-              <select
-                name="account_type"
-                value={searchParams.account_type}
-                onChange={handleInputChange}
-              >
-                <option value="">Select...</option>
-                {!loadingAccountTypes && !errorAccountTypes && accountTypeData && accountTypeData.getAccountTypeValues && 
+              {!loadingAccountTypes && !errorAccountTypes && accountTypeData && accountTypeData.getAccountTypeValues && 
+                (accountTypeData.getAccountTypeValues.length > 0 ? (
+                  <select
+                    name="account_type"
+                    value={searchParams.account_type}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Select...</option>
+                    {accountTypeData.getAccountTypeValues.map(type => (
+                      <option key={type.value} value={type.value}>
+                        {type.value} ({type.count})
+                      </option>
+                    ))}
+                  </select>
+                ) : (
                   accountTypeData.getAccountTypeValues.map(type => (
-                    <option key={type.value} value={type.value}>
+                    <div key={type.value} className="static-value">
                       {type.value} ({type.count})
-                    </option>
+                    </div>
                   ))
-                }
-              </select>
+                ))
+              }
               {loadingAccountTypes && <span className="loading-indicator">Loading...</span>}
               {errorAccountTypes && <span className="error-message">Error loading account type values</span>}
             </div>

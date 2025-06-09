@@ -546,3 +546,11 @@ li:last-child {
 .no-value {
   color: #999;
 }
+
+.static-value {
+  padding: 10px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  margin-top: 5px;
+  font-weight: bold;
+}

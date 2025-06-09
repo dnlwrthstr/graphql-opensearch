@@ -712,8 +712,12 @@ def resolve_partner_type_values(_, info):
         # Convert the buckets to the expected format
         result = []
         for bucket in buckets:
-            # Skip null values
+            # Include null values as "unknown"
             if bucket["key"] == "null":
+                result.append({
+                    "value": "unknown",
+                    "count": bucket["doc_count"]
+                })
                 continue
 
             # Add the value and count to the result
@@ -760,8 +764,12 @@ def resolve_legal_entity_type_values(_, info):
         # Convert the buckets to the expected format
         result = []
         for bucket in buckets:
-            # Skip null values
+            # Include null values as "unknown"
             if bucket["key"] == "null":
+                result.append({
+                    "value": "unknown",
+                    "count": bucket["doc_count"]
+                })
                 continue
 
             # Add the value and count to the result
@@ -808,8 +816,12 @@ def resolve_pep_flag_values(_, info):
         # Convert the buckets to the expected format
         result = []
         for bucket in buckets:
-            # Skip null values
+            # Include null values as "unknown"
             if bucket["key"] == "null":
+                result.append({
+                    "value": "unknown",
+                    "count": bucket["doc_count"]
+                })
                 continue
 
             # Add the value and count to the result
@@ -856,8 +868,12 @@ def resolve_kyc_status_values(_, info):
         # Convert the buckets to the expected format
         result = []
         for bucket in buckets:
-            # Skip null values
+            # Include null values as "unknown"
             if bucket["key"] == "null":
+                result.append({
+                    "value": "unknown",
+                    "count": bucket["doc_count"]
+                })
                 continue
 
             # Add the value and count to the result
@@ -904,8 +920,12 @@ def resolve_sanctions_screened_values(_, info):
         # Convert the buckets to the expected format
         result = []
         for bucket in buckets:
-            # Skip null values
+            # Include null values as "unknown"
             if bucket["key"] == "null":
+                result.append({
+                    "value": "unknown",
+                    "count": bucket["doc_count"]
+                })
                 continue
 
             # Add the value and count to the result
@@ -952,8 +972,12 @@ def resolve_risk_level_values(_, info):
         # Convert the buckets to the expected format
         result = []
         for bucket in buckets:
-            # Skip null values
+            # Include null values as "unknown"
             if bucket["key"] == "null":
+                result.append({
+                    "value": "unknown",
+                    "count": bucket["doc_count"]
+                })
                 continue
 
             # Add the value and count to the result
@@ -1000,8 +1024,12 @@ def resolve_account_type_values(_, info):
         # Convert the buckets to the expected format
         result = []
         for bucket in buckets:
-            # Skip null values
+            # Include null values as "unknown"
             if bucket["key"] == "null":
+                result.append({
+                    "value": "unknown",
+                    "count": bucket["doc_count"]
+                })
                 continue
 
             # Add the value and count to the result
