@@ -24,7 +24,9 @@ function App() {
     <ApolloProvider client={client}>
       <Router>
         <div className="App">
-          <Navigation />
+          <aside className="sidebar">
+            <Navigation />
+          </aside>
           <main>
             <Routes>
               <Route path="/" element={<PartnerPortfolioView />} />

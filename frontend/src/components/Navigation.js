@@ -17,7 +17,7 @@ function Navigation() {
   };
 
   return (
-    <nav className="main-navigation">
+    <nav>
       <h2>Bank Data Search</h2>
       <ul className="nav-menu">
         <li className="menu-item">
