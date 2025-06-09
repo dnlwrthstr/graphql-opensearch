@@ -85,7 +85,8 @@ class TestFinancialInstrumentsIndex(unittest.TestCase):
         isin = res["hits"]["hits"][0]["_source"]["isin"]
 
         # Search for financial instruments with the ISIN
-        search_query = {"term": {"isin": isin}}
+        # Use isin.keyword for exact matching since isin is now a text field with a keyword subfield
+        search_query = {"term": {"isin.keyword": isin}}
         res = self.client.search(index="financial_instruments", body={"query": search_query})
 
         # Verify that we got at least one result

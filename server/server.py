@@ -368,13 +368,16 @@ query.set_field("autocompletePartnerName", resolve_autocomplete_partner_name)
 # Define the resolver function for autocompleteInstrumentName
 def resolve_autocomplete_instrument_name(_, info, query):
     try:
-        # Use a multi-match query to search in both name and ISIN fields
+        # Use a bool query with should clauses to search in both name and ISIN fields
+        # For name, use phrase_prefix which works on text fields
+        # For ISIN, use prefix on the keyword field
         search_query = {
             "query": {
-                "multi_match": {
-                    "query": query,
-                    "fields": ["name", "isin"],
-                    "type": "phrase_prefix"
+                "bool": {
+                    "should": [
+                        {"match_phrase_prefix": {"name": query}},
+                        {"prefix": {"isin.keyword": query}}
+                    ]
                 }
             },
             "size": 10

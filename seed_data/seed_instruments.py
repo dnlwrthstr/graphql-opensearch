@@ -21,7 +21,16 @@ def seed_instruments():
             "properties": {
                 # Common fields for all instruments
                 "id": {"type": "keyword"},
-                "isin": {"type": "keyword"},
+                "isin": {
+                    "type": "text",
+                    "analyzer": "standard",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword",
+                            "ignore_above": 256
+                        }
+                    }
+                },
                 "name": {
                     "type": "text",
                     "analyzer": "standard",
