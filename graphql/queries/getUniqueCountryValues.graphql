@@ -1,0 +1,6 @@
+query GetUniqueCountryValues($field: String!, $filter: String) {
+  getUniqueCountryValues(field: $field, filter: $filter) {
+    value
+    count
+  }
+}

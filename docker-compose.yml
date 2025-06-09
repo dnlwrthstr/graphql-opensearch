@@ -26,7 +26,9 @@ services:
       - opensearch
 
   api:
-    build: ./server
+    build:
+      context: .
+      dockerfile: server/Dockerfile
     container_name: graphql-api
     ports:
       - "8000:8000"

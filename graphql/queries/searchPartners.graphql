@@ -1,0 +1,19 @@
+query SearchPartners($query: String, $id: ID) {
+  searchPartners(query: $query, id: $id) {
+    id
+    partner_type
+    name
+    birth_date
+    incorporation_date
+    residency_country
+    tax_id
+    nationality
+    legal_entity_type
+    kyc_status
+    risk_level
+    account_type
+    pep_flag
+    sanctions_screened
+    created_at
+  }
+}

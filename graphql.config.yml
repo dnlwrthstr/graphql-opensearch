@@ -1,0 +1,27 @@
+# GraphQL Config for the OpenSearch GraphQL API
+schema: graphql/schema.graphql
+documents: 'graphql/**/*.graphql'
+extensions:
+  endpoints:
+    default:
+      url: 'http://localhost:8000'
+      headers:
+        Content-Type: 'application/json'
+  customDirectives:
+    - name: 'deprecated'
+      args:
+        reason: 'String'
+      locations:
+        - FIELD_DEFINITION
+        - ENUM_VALUE
+  codegenConfig:
+    scalars:
+      Date: string
+      DateTime: string
+  prettier:
+    printWidth: 80
+    tabWidth: 2
+    useTabs: false
+    semi: true
+    singleQuote: true
+    trailingComma: 'all'

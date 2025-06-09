@@ -1,0 +1,29 @@
+query GetPartnerWithPortfolios($id: ID!) {
+  getPartner(id: $id) {
+    id
+    partner_type
+    name
+    residency_country
+    nationality
+    created_at
+    portfolios {
+      id
+      name
+      currency
+      created_at
+      positions {
+        instrument_id
+        quantity
+        market_value
+        currency
+        instrument {
+          id
+          name
+          isin
+          type
+          currency
+        }
+      }
+    }
+  }
+}
