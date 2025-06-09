@@ -378,26 +378,38 @@ function AdvancedPartnerSearch() {
             <div className="input-group">
               <label>PEP Flag:</label>
               {!loadingPepFlags && !errorPepFlags && pepFlagData && pepFlagData.getPepFlagValues && 
-                (pepFlagData.getPepFlagValues.length > 0 ? (
-                  <select
-                    name="pep_flag"
-                    value={searchParams.pep_flag}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">No Selection</option>
-                    {pepFlagData.getPepFlagValues.map(flag => (
-                      <option key={flag.value} value={flag.value}>
-                        {flag.value === "true" ? "Yes" : "No"} ({flag.count})
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  pepFlagData.getPepFlagValues.map(flag => (
-                    <div key={flag.value} className="static-value">
-                      {flag.value === "true" ? "Yes" : "No"} ({flag.count})
-                    </div>
-                  ))
-                ))
+                (() => {
+                  // Count how many values have non-zero counts
+                  const nonZeroValues = pepFlagData.getPepFlagValues.filter(flag => flag.count > 0);
+
+                  // If there's only one value with non-zero count, display it as static text
+                  if (nonZeroValues.length === 1) {
+                    const flag = nonZeroValues[0];
+                    return (
+                      <div className="static-value">
+                        {flag.value === "true" ? "Yes" : (flag.value === "false" ? "No" : "Unknown")} 
+                        <span className="count-badge">{flag.count}</span>
+                      </div>
+                    );
+                  } 
+                  // Otherwise, display a dropdown
+                  else {
+                    return (
+                      <select
+                        name="pep_flag"
+                        value={searchParams.pep_flag}
+                        onChange={handleInputChange}
+                      >
+                        <option value="">No Selection</option>
+                        {pepFlagData.getPepFlagValues.map(flag => (
+                          <option key={flag.value} value={flag.value}>
+                            {flag.value === "true" ? "Yes" : (flag.value === "false" ? "No" : "Unknown")} • {flag.count}
+                          </option>
+                        ))}
+                      </select>
+                    );
+                  }
+                })()
               }
               {loadingPepFlags && <span className="loading-indicator">Loading...</span>}
               {errorPepFlags && <span className="error-message">Error loading PEP flag values</span>}
@@ -437,26 +449,38 @@ function AdvancedPartnerSearch() {
             <div className="input-group">
               <label>Sanctions Screened:</label>
               {!loadingSanctionsScreened && !errorSanctionsScreened && sanctionsScreenedData && sanctionsScreenedData.getSanctionsScreenedValues && 
-                (sanctionsScreenedData.getSanctionsScreenedValues.length > 0 ? (
-                  <select
-                    name="sanctions_screened"
-                    value={searchParams.sanctions_screened}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">No Selection</option>
-                    {sanctionsScreenedData.getSanctionsScreenedValues.map(status => (
-                      <option key={status.value} value={status.value}>
-                        {status.value === "true" ? "Yes" : "No"} ({status.count})
-                      </option>
-                    ))}
-                  </select>
-                ) : (
-                  sanctionsScreenedData.getSanctionsScreenedValues.map(status => (
-                    <div key={status.value} className="static-value">
-                      {status.value === "true" ? "Yes" : "No"} ({status.count})
-                    </div>
-                  ))
-                ))
+                (() => {
+                  // Count how many values have non-zero counts
+                  const nonZeroValues = sanctionsScreenedData.getSanctionsScreenedValues.filter(status => status.count > 0);
+
+                  // If there's only one value with non-zero count, display it as static text
+                  if (nonZeroValues.length === 1) {
+                    const status = nonZeroValues[0];
+                    return (
+                      <div className="static-value">
+                        {status.value === "true" ? "Yes" : (status.value === "false" ? "No" : "Unknown")} 
+                        <span className="count-badge">{status.count}</span>
+                      </div>
+                    );
+                  } 
+                  // Otherwise, display a dropdown
+                  else {
+                    return (
+                      <select
+                        name="sanctions_screened"
+                        value={searchParams.sanctions_screened}
+                        onChange={handleInputChange}
+                      >
+                        <option value="">No Selection</option>
+                        {sanctionsScreenedData.getSanctionsScreenedValues.map(status => (
+                          <option key={status.value} value={status.value}>
+                            {status.value === "true" ? "Yes" : (status.value === "false" ? "No" : "Unknown")} • {status.count}
+                          </option>
+                        ))}
+                      </select>
+                    );
+                  }
+                })()
               }
               {loadingSanctionsScreened && <span className="loading-indicator">Loading...</span>}
               {errorSanctionsScreened && <span className="error-message">Error loading sanctions screened values</span>}
@@ -559,7 +583,7 @@ function AdvancedPartnerSearch() {
                   <tr key={partner.id}>
                     <td>{partner.name}</td>
                     <td>{partner.partner_type}</td>
-                    <td>{partner.partner_type === 'individual' ? 'Individual' : (partner.legal_entity_type || '-')}</td>
+                    <td>{partner.legal_entity_type || (partner.partner_type === 'individual' ? 'unknown' : '-')}</td>
                     <td>{partner.residency_country}</td>
                     <td>{partner.nationality || '-'}</td>
                     <td>{partner.kyc_status}</td>

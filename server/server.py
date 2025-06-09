@@ -67,6 +67,9 @@ def resolve_search_partners(_, info, query=None, id=None):
                                 "analyze_wildcard": True
                             }
                         })
+                    elif field in ['legal_entity_type', 'kyc_status', 'risk_level', 'account_type'] and value.lower() == 'unknown':
+                        # Handle "unknown" values by searching for null values
+                        field_queries.append({"bool": {"must_not": {"exists": {"field": field}}}})
                     else:
                         # Text fields
                         field_queries.append({"match": {field: value}})
@@ -77,8 +80,31 @@ def resolve_search_partners(_, info, query=None, id=None):
             else:
                 # Fallback to multi_match if parsing fails
                 search_query = {"multi_match": {"query": query, "fields": ["name", "partner_type", "residency_country", "nationality"]}}
+        elif ':' in query:
+            # Handle simple field:value queries without AND logic
+            field, value = query.split(':', 1)
+            # Handle different field types appropriately
+            if field in ['pep_flag', 'sanctions_screened']:
+                # Boolean fields
+                bool_value = value.lower() == 'true'
+                search_query = {"term": {field: bool_value}}
+            elif field == 'name':
+                # Use query_string for name field to support expressions and wildcards
+                search_query = {
+                    "query_string": {
+                        "default_field": "name",
+                        "query": value,
+                        "analyze_wildcard": True
+                    }
+                }
+            elif field in ['legal_entity_type', 'kyc_status', 'risk_level', 'account_type'] and value.lower() == 'unknown':
+                # Handle "unknown" values by searching for null values
+                search_query = {"bool": {"must_not": {"exists": {"field": field}}}}
+            else:
+                # Text fields
+                search_query = {"match": {field: value}}
         else:
-            # Use multi_match for simple queries
+            # Use multi_match for simple queries without field:value format
             search_query = {"multi_match": {"query": query, "fields": ["name", "partner_type", "residency_country", "nationality"]}}
 
     # Add size parameter to retrieve up to 10000 partners
@@ -749,7 +775,7 @@ def resolve_legal_entity_type_values(_, info):
                     "terms": {
                         "field": "legal_entity_type",
                         "size": 10,  # Get up to 10 unique values
-                        "missing": "null"  # Include documents where the field is missing
+                        "missing": "UNSET"  # Include documents where the field is missing
                     }
                 }
             }
@@ -764,8 +790,8 @@ def resolve_legal_entity_type_values(_, info):
         # Convert the buckets to the expected format
         result = []
         for bucket in buckets:
-            # Include null values as "unknown"
-            if bucket["key"] == "null":
+            # Include null/UNSET values as "unknown"
+            if bucket["key"] == "null" or bucket["key"] == "UNSET":
                 result.append({
                     "value": "unknown",
                     "count": bucket["doc_count"]
@@ -793,15 +819,19 @@ def resolve_pep_flag_values(_, info):
     Returns unique values for pep_flag field with counts.
     """
     try:
-        # Build the query
+        # Build the query with both terms and missing aggregations
         query_body = {
             "size": 0,  # We only want aggregation results, not documents
             "aggs": {
-                "unique_values": {
+                "partners_by_pep_flag": {
                     "terms": {
                         "field": "pep_flag",
-                        "size": 2,  # Only true/false values
-                        "missing": "null"  # Include documents where the field is missing
+                        "size": 10
+                    }
+                },
+                "missing_pep_flag": {
+                    "missing": {
+                        "field": "pep_flag"
                     }
                 }
             }
@@ -811,23 +841,50 @@ def resolve_pep_flag_values(_, info):
         res = client.search(index="partners", body=query_body)
 
         # Extract the buckets from the aggregation results
-        buckets = res["aggregations"]["unique_values"]["buckets"]
+        buckets = res["aggregations"]["partners_by_pep_flag"]["buckets"]
+        missing_count = res["aggregations"]["missing_pep_flag"]["doc_count"]
 
         # Convert the buckets to the expected format
         result = []
-        for bucket in buckets:
-            # Include null values as "unknown"
-            if bucket["key"] == "null":
-                result.append({
-                    "value": "unknown",
-                    "count": bucket["doc_count"]
-                })
-                continue
 
+        # Track which values we've seen
+        seen_values = set()
+
+        for bucket in buckets:
             # Add the value and count to the result
+            value = str(bucket["key_as_string"] if "key_as_string" in bucket else bucket["key"]).lower()  # Convert boolean to string "true"/"false"
             result.append({
-                "value": str(bucket["key"]).lower(),  # Convert boolean to string "true"/"false"
+                "value": value,
                 "count": bucket["doc_count"]
+            })
+            seen_values.add(value)
+
+        # Add missing values as "unknown"
+        if missing_count > 0:
+            result.append({
+                "value": "unknown",
+                "count": missing_count
+            })
+            seen_values.add("unknown")
+
+        # Ensure we always have true and false options, even if they have 0 count
+        if "true" not in seen_values:
+            result.append({
+                "value": "true",
+                "count": 0
+            })
+
+        if "false" not in seen_values:
+            result.append({
+                "value": "false",
+                "count": 0
+            })
+
+        # Ensure we always have unknown option, even if there are no null values
+        if "unknown" not in seen_values:
+            result.append({
+                "value": "unknown",
+                "count": 0
             })
 
         return result
@@ -897,15 +954,19 @@ def resolve_sanctions_screened_values(_, info):
     Returns unique values for sanctions_screened field with counts.
     """
     try:
-        # Build the query
+        # Build the query with both terms and missing aggregations
         query_body = {
             "size": 0,  # We only want aggregation results, not documents
             "aggs": {
-                "unique_values": {
+                "partners_by_sanctions_screened": {
                     "terms": {
                         "field": "sanctions_screened",
-                        "size": 2,  # Only true/false values
-                        "missing": "null"  # Include documents where the field is missing
+                        "size": 10
+                    }
+                },
+                "missing_sanctions_screened": {
+                    "missing": {
+                        "field": "sanctions_screened"
                     }
                 }
             }
@@ -915,23 +976,50 @@ def resolve_sanctions_screened_values(_, info):
         res = client.search(index="partners", body=query_body)
 
         # Extract the buckets from the aggregation results
-        buckets = res["aggregations"]["unique_values"]["buckets"]
+        buckets = res["aggregations"]["partners_by_sanctions_screened"]["buckets"]
+        missing_count = res["aggregations"]["missing_sanctions_screened"]["doc_count"]
 
         # Convert the buckets to the expected format
         result = []
-        for bucket in buckets:
-            # Include null values as "unknown"
-            if bucket["key"] == "null":
-                result.append({
-                    "value": "unknown",
-                    "count": bucket["doc_count"]
-                })
-                continue
 
+        # Track which values we've seen
+        seen_values = set()
+
+        for bucket in buckets:
             # Add the value and count to the result
+            value = str(bucket["key_as_string"] if "key_as_string" in bucket else bucket["key"]).lower()  # Convert boolean to string "true"/"false"
             result.append({
-                "value": str(bucket["key"]).lower(),  # Convert boolean to string "true"/"false"
+                "value": value,
                 "count": bucket["doc_count"]
+            })
+            seen_values.add(value)
+
+        # Add missing values as "unknown"
+        if missing_count > 0:
+            result.append({
+                "value": "unknown",
+                "count": missing_count
+            })
+            seen_values.add("unknown")
+
+        # Ensure we always have true and false options, even if they have 0 count
+        if "true" not in seen_values:
+            result.append({
+                "value": "true",
+                "count": 0
+            })
+
+        if "false" not in seen_values:
+            result.append({
+                "value": "false",
+                "count": 0
+            })
+
+        # Ensure we always have unknown option, even if there are no null values
+        if "unknown" not in seen_values:
+            result.append({
+                "value": "unknown",
+                "count": 0
             })
 
         return result

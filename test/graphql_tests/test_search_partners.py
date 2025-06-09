@@ -102,5 +102,57 @@ class TestSearchPartners(unittest.TestCase):
         with self.assertRaises(ValueError):
             resolve_search_partners(None, None)
 
+    @patch('server.server.client')
+    def test_search_unknown_legal_entity_type(self, mock_client):
+        # Setup mock response
+        mock_response = {
+            "hits": {
+                "hits": [
+                    {
+                        "_id": "partner-3",
+                        "_source": {
+                            "name": "Partner with Unknown Legal Entity Type",
+                            "partner_type": "individual",
+                            "residency_country": "FR",
+                            "nationality": "FR",
+                            # legal_entity_type is intentionally missing to simulate null/unknown value
+                        }
+                    }
+                ]
+            }
+        }
+        mock_client.search.return_value = mock_response
+
+        # Call the resolver with a query that includes legal_entity_type:unknown
+        result = resolve_search_partners(None, None, query="legal_entity_type:unknown")
+
+        # Assert the client was called with the correct parameters
+        # The query should use a "must_not exists" query for the legal_entity_type field
+        mock_client.search.assert_called_once_with(
+            index="partners", 
+            body={
+                "query": {
+                    "bool": {
+                        "must_not": {
+                            "exists": {
+                                "field": "legal_entity_type"
+                            }
+                        }
+                    }
+                },
+                "size": 10000
+            }
+        )
+
+        # Assert the result is as expected
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["id"], "partner-3")
+        self.assertEqual(result[0]["name"], "Partner with Unknown Legal Entity Type")
+        self.assertEqual(result[0]["partner_type"], "individual")
+        self.assertEqual(result[0]["residency_country"], "FR")
+        self.assertEqual(result[0]["nationality"], "FR")
+        # legal_entity_type should not be present in the result
+        self.assertNotIn("legal_entity_type", result[0])
+
 if __name__ == '__main__':
     unittest.main()

@@ -554,3 +554,14 @@ li:last-child {
   margin-top: 5px;
   font-weight: bold;
 }
+
+.count-badge {
+  display: inline-block;
+  background-color: #e0e0e0;
+  border-radius: 12px;
+  padding: 2px 8px;
+  margin-left: 8px;
+  font-size: 0.9em;
+  color: #555;
+  font-weight: normal;
+}
