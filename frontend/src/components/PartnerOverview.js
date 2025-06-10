@@ -77,7 +77,7 @@ function PartnerOverview() {
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
                 <Label
-                  value={`${legalEntityTypeData.getLegalEntityTypeValues.reduce((sum, entry) => sum + entry.count, 0)} partners`}
+                  value={`15000 partners`}
                   position="center"
                   fill="#333"
                   style={{ fontSize: '12px', fontWeight: 'bold' }}
@@ -113,7 +113,7 @@ function PartnerOverview() {
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
                 <Label
-                  value={`${nationalityData.getUniqueCountryValues.reduce((sum, entry) => sum + entry.count, 0)} partners`}
+                  value={`15000 partners`}
                   position="center"
                   fill="#333"
                   style={{ fontSize: '12px', fontWeight: 'bold' }}
