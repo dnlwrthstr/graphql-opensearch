@@ -59,20 +59,16 @@ function PartnerOverview() {
         {loadingLegalEntityTypes && <p>Loading...</p>}
         {errorLegalEntityTypes && <p>Error loading legal entity type data</p>}
         {legalEntityTypeData && legalEntityTypeData.getLegalEntityTypeValues && (
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={220}>
             <PieChart>
               <Pie
                 data={legalEntityTypeData.getLegalEntityTypeValues}
                 cx="50%"
                 cy="50%"
                 labelLine={true}
-                label={{
-                  fontSize: 10,
-                  fill: '#333',
-                  position: 'outside'
-                }}
-                outerRadius={80}
-                innerRadius={40}
+                label={({ name, value, percent }) => `${name}: ${value}`}
+                outerRadius={65}
+                innerRadius={35}
                 fill="#8884d8"
                 dataKey="count"
                 nameKey="value"
@@ -84,16 +80,10 @@ function PartnerOverview() {
                   value={`${legalEntityTypeData.getLegalEntityTypeValues.reduce((sum, entry) => sum + entry.count, 0)} partners`}
                   position="center"
                   fill="#333"
-                  style={{ fontSize: '14px', fontWeight: 'bold' }}
+                  style={{ fontSize: '12px', fontWeight: 'bold' }}
                 />
               </Pie>
               <Tooltip content={<CustomTooltip />} />
-              <Legend 
-                layout="vertical" 
-                verticalAlign="bottom" 
-                align="center"
-                wrapperStyle={{ opacity: 0.7, paddingTop: 20 }}
-              />
             </PieChart>
           </ResponsiveContainer>
         )}
@@ -105,20 +95,16 @@ function PartnerOverview() {
         {loadingNationalities && <p>Loading...</p>}
         {errorNationalities && <p>Error loading nationality data</p>}
         {nationalityData && nationalityData.getUniqueCountryValues && (
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height={220}>
             <PieChart>
               <Pie
                 data={nationalityData.getUniqueCountryValues}
                 cx="50%"
                 cy="50%"
                 labelLine={true}
-                label={{
-                  fontSize: 10,
-                  fill: '#333',
-                  position: 'outside'
-                }}
-                outerRadius={80}
-                innerRadius={40}
+                label={({ name, value, percent }) => `${name}: ${value}`}
+                outerRadius={65}
+                innerRadius={35}
                 fill="#8884d8"
                 dataKey="count"
                 nameKey="value"
@@ -130,16 +116,10 @@ function PartnerOverview() {
                   value={`${nationalityData.getUniqueCountryValues.reduce((sum, entry) => sum + entry.count, 0)} partners`}
                   position="center"
                   fill="#333"
-                  style={{ fontSize: '14px', fontWeight: 'bold' }}
+                  style={{ fontSize: '12px', fontWeight: 'bold' }}
                 />
               </Pie>
               <Tooltip content={<CustomTooltip />} />
-              <Legend 
-                layout="vertical" 
-                verticalAlign="bottom" 
-                align="center"
-                wrapperStyle={{ opacity: 0.7, paddingTop: 20 }}
-              />
             </PieChart>
           </ResponsiveContainer>
         )}
