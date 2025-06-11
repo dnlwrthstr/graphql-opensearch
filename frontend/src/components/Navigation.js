@@ -31,6 +31,14 @@ function Navigation() {
             <ul className="submenu">
               <li>
                 <NavLink 
+                  to="/partner-overview" 
+                  className={({ isActive }) => isActive ? "active-nav-link" : "nav-link"}
+                >
+                  Overview
+                </NavLink>
+              </li>
+              <li>
+                <NavLink 
                   to="/simple-search" 
                   className={({ isActive }) => isActive ? "active-nav-link" : "nav-link"}
                 >

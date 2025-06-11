@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { gql, useLazyQuery } from '@apollo/client';
-import PartnerOverview from './PartnerOverview';
 
 // GraphQL query for autocomplete
 const AUTOCOMPLETE_PARTNER_NAME = gql`
@@ -113,122 +112,117 @@ function SimplePartnerSearch() {
   };
 
   return (
-    <div className="partner-search-layout">
-      <section className="search-panel">
-        <h2>Simple Partner Search</h2>
-        <div className="search-inputs">
-          <div className="input-group">
-            <label>Partner Name:</label>
-            <div className="autocomplete-container">
-              <input
-                type="text"
-                value={partnerName}
-                onChange={handleInputChange}
-                placeholder="Enter partner name..."
-                onFocus={() => partnerName.length >= 2 && partnerName !== lastSearched && setShowSuggestions(true)}
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-              />
-              {showSuggestions && suggestions.length > 0 && (
-                <div className="suggestions-dropdown">
-                  {suggestions.map((suggestion, index) => (
-                    <div 
-                      key={index} 
-                      className="suggestion-item"
-                      onClick={() => handleSuggestionClick(suggestion)}
-                    >
-                      <div className="suggestion-name">{suggestion.name}</div>
-                      <div className="suggestion-details">
-                        <span>ID: {suggestion.id}</span>
-                        {suggestion.residency_country && <span>Residence: {suggestion.residency_country}</span>}
-                        {suggestion.nationality && <span>Nationality: {suggestion.nationality}</span>}
-                      </div>
+    <div className="search-container">
+      <h2>Simple Partner Search</h2>
+      <div className="search-inputs">
+        <div className="input-group">
+          <label>Partner Name:</label>
+          <div className="autocomplete-container">
+            <input
+              type="text"
+              value={partnerName}
+              onChange={handleInputChange}
+              placeholder="Enter partner name..."
+              onFocus={() => partnerName.length >= 2 && partnerName !== lastSearched && setShowSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+            />
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="suggestions-dropdown">
+                {suggestions.map((suggestion, index) => (
+                  <div 
+                    key={index} 
+                    className="suggestion-item"
+                    onClick={() => handleSuggestionClick(suggestion)}
+                  >
+                    <div className="suggestion-name">{suggestion.name}</div>
+                    <div className="suggestion-details">
+                      <span>ID: {suggestion.id}</span>
+                      {suggestion.residency_country && <span>Residence: {suggestion.residency_country}</span>}
+                      {suggestion.nationality && <span>Nationality: {suggestion.nationality}</span>}
                     </div>
-                  ))}
-                </div>
-              )}
-              {autocompleteLoading && <div className="loading-indicator">Loading suggestions...</div>}
-            </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {autocompleteLoading && <div className="loading-indicator">Loading suggestions...</div>}
           </div>
         </div>
+      </div>
 
-        {partnerLoading && <p>Loading partner data...</p>}
+      {partnerLoading && <p>Loading partner data...</p>}
 
-        {partnerData && partnerData.getPartner && (
-          <div className="partner-portfolio-content">
-            <div className="partner-info">
-              <h3>{partnerData.getPartner.name}</h3>
-              <p>Partner ID: {partnerData.getPartner.id} | Type: {partnerData.getPartner.partner_type}</p>
-              {partnerData.getPartner.residency_country && <p>Residency: {partnerData.getPartner.residency_country}</p>}
-              {partnerData.getPartner.nationality && <p>Nationality: {partnerData.getPartner.nationality}</p>}
-              <p>Created: {partnerData.getPartner.created_at}</p>
-            </div>
-
-            <div className="portfolios-section">
-              <h3>Portfolios</h3>
-              {partnerData.getPartner.portfolios.length === 0 ? (
-                <p>No portfolios found for this partner</p>
-              ) : (
-                <div className="portfolios-list">
-                  {partnerData.getPartner.portfolios.map(portfolio => (
-                    <div key={portfolio.id} className="portfolio-item">
-                      <div 
-                        className="portfolio-header" 
-                        onClick={() => togglePortfolio(portfolio.id)}
-                      >
-                        <h4>{portfolio.name}</h4>
-                        <div className="portfolio-summary">
-                          <p>Currency: {portfolio.currency} | Created: {portfolio.created_at} | Positions: {portfolio.positions.length}</p>
-                        </div>
-                        <span>{expandedPortfolios[portfolio.id] ? '▼' : '►'}</span>
-                      </div>
-
-                      {expandedPortfolios[portfolio.id] && (
-                        <div className="positions-list">
-                          <h5>Positions</h5>
-                          {portfolio.positions.length === 0 ? (
-                            <p>No positions in this portfolio</p>
-                          ) : (
-                            <table>
-                              <thead>
-                                <tr>
-                                  <th>Instrument Name</th>
-                                  <th>ISIN</th>
-                                  <th>Type</th>
-                                  <th>Quantity</th>
-                                  <th>Market Value</th>
-                                  <th>Currency</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {portfolio.positions.map((position, index) => {
-                                  const instrument = position.instrument || {};
-                                  return (
-                                    <tr key={index}>
-                                      <td>{instrument.name || 'Unknown'}</td>
-                                      <td>{instrument.isin || 'N/A'}</td>
-                                      <td>{instrument.type || 'N/A'}</td>
-                                      <td>{position.quantity ? position.quantity.toLocaleString() : 'N/A'}</td>
-                                      <td>{position.market_value ? position.market_value.toLocaleString() : 'N/A'}</td>
-                                      <td>{position.currency || 'N/A'}</td>
-                                    </tr>
-                                  );
-                                })}
-                              </tbody>
-                            </table>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+      {partnerData && partnerData.getPartner && (
+        <div className="partner-portfolio-content">
+          <div className="partner-info">
+            <h3>{partnerData.getPartner.name}</h3>
+            <p>Partner ID: {partnerData.getPartner.id} | Type: {partnerData.getPartner.partner_type}</p>
+            {partnerData.getPartner.residency_country && <p>Residency: {partnerData.getPartner.residency_country}</p>}
+            {partnerData.getPartner.nationality && <p>Nationality: {partnerData.getPartner.nationality}</p>}
+            <p>Created: {partnerData.getPartner.created_at}</p>
           </div>
-        )}
-      </section>
-      <aside className="overview-panel">
-        <PartnerOverview />
-      </aside>
+
+          <div className="portfolios-section">
+            <h3>Portfolios</h3>
+            {partnerData.getPartner.portfolios.length === 0 ? (
+              <p>No portfolios found for this partner</p>
+            ) : (
+              <div className="portfolios-list">
+                {partnerData.getPartner.portfolios.map(portfolio => (
+                  <div key={portfolio.id} className="portfolio-item">
+                    <div 
+                      className="portfolio-header" 
+                      onClick={() => togglePortfolio(portfolio.id)}
+                    >
+                      <h4>{portfolio.name}</h4>
+                      <div className="portfolio-summary">
+                        <p>Currency: {portfolio.currency} | Created: {portfolio.created_at} | Positions: {portfolio.positions.length}</p>
+                      </div>
+                      <span>{expandedPortfolios[portfolio.id] ? '▼' : '►'}</span>
+                    </div>
+
+                    {expandedPortfolios[portfolio.id] && (
+                      <div className="positions-list">
+                        <h5>Positions</h5>
+                        {portfolio.positions.length === 0 ? (
+                          <p>No positions in this portfolio</p>
+                        ) : (
+                          <table>
+                            <thead>
+                              <tr>
+                                <th>Instrument Name</th>
+                                <th>ISIN</th>
+                                <th>Type</th>
+                                <th>Quantity</th>
+                                <th>Market Value</th>
+                                <th>Currency</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {portfolio.positions.map((position, index) => {
+                                const instrument = position.instrument || {};
+                                return (
+                                  <tr key={index}>
+                                    <td>{instrument.name || 'Unknown'}</td>
+                                    <td>{instrument.isin || 'N/A'}</td>
+                                    <td>{instrument.type || 'N/A'}</td>
+                                    <td>{position.quantity ? position.quantity.toLocaleString() : 'N/A'}</td>
+                                    <td>{position.market_value ? position.market_value.toLocaleString() : 'N/A'}</td>
+                                    <td>{position.currency || 'N/A'}</td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

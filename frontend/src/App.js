@@ -11,6 +11,7 @@ import AdvancedPartnerSearch from './components/AdvancedPartnerSearch';
 import SimpleInstrumentSearch from './components/SimpleInstrumentSearch';
 import AdvancedInstrumentSearch from './components/AdvancedInstrumentSearch';
 import PortfoliosWithInstrument from './components/PortfoliosWithInstrument';
+import PartnerOverviewPage from './components/PartnerOverviewPage';
 
 // Initialize Apollo Client
 const client = new ApolloClient({
@@ -35,6 +36,7 @@ function App() {
               <Route path="/simple-instrument-search" element={<SimpleInstrumentSearch />} />
               <Route path="/advanced-instrument-search" element={<AdvancedInstrumentSearch />} />
               <Route path="/portfolios-with-instrument" element={<PortfoliosWithInstrument />} />
+              <Route path="/partner-overview" element={<PartnerOverviewPage />} />
             </Routes>
           </main>
         </div>
