@@ -67,6 +67,14 @@ function Navigation() {
             <ul className="submenu">
               <li>
                 <NavLink 
+                  to="/dashboard" 
+                  className={({ isActive }) => isActive ? "active-nav-link" : "nav-link"}
+                >
+                  Dashboard
+                </NavLink>
+              </li>
+              <li>
+                <NavLink 
                   to="/" 
                   className={({ isActive }) => isActive ? "active-nav-link" : "nav-link"}
                 >

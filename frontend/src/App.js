@@ -13,6 +13,7 @@ import AdvancedInstrumentSearch from './components/AdvancedInstrumentSearch';
 import PortfoliosWithInstrument from './components/PortfoliosWithInstrument';
 import PartnerOverviewPage from './components/PartnerOverviewPage';
 import InstrumentOverviewPage from './components/InstrumentOverviewPage';
+import Dashboard from './components/Dashboard';
 
 // Initialize Apollo Client
 const client = new ApolloClient({
@@ -39,6 +40,7 @@ function App() {
               <Route path="/portfolios-with-instrument" element={<PortfoliosWithInstrument />} />
               <Route path="/partner-overview" element={<PartnerOverviewPage />} />
               <Route path="/instrument-overview" element={<InstrumentOverviewPage />} />
+              <Route path="/dashboard" element={<Dashboard />} />
             </Routes>
           </main>
         </div>
