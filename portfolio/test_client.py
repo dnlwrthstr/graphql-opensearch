@@ -1,6 +1,7 @@
 import requests
 import json
 import sys
+from tabulate import tabulate
 
 def test_portfolio_service(portfolio_id, reference_currency, port=8000):
     """
@@ -26,24 +27,44 @@ def test_portfolio_service(portfolio_id, reference_currency, port=8000):
             # Print the JSON response
             print(json.dumps(data, indent=2))
 
-            # Print portfolio information
-            print(f"Portfolio ID: {data['portfolio_id']}")
-            print(f"Reference Currency: {data['reference_currency']}")
-            print(f"Total Portfolio Value: {data['total_portfolio_value']:.2f} {reference_currency}")
-            print("\nInstrument Groups:")
+            # Create portfolio header table
+            portfolio_header = [
+                ["Portfolio ID", data['portfolio_id']],
+                ["Reference Currency", data['reference_currency']],
+                ["Total Portfolio Value", f"{data['total_portfolio_value']:.2f} {reference_currency}"]
+            ]
+            print("\nPORTFOLIO")
+            print(tabulate(portfolio_header, tablefmt="grid"))
 
-            # Print instrument groups
+            # Print instrument groups table
+            print("\nINSTRUMENT GROUPS")
+            groups_table = []
             for group in data['instrument_groups']:
-                print(f"\n  {group['instrument_type']}:")
-                print(f"  Total Value: {group['total_value']:.2f} {reference_currency}")
-                print("  Positions:")
+                groups_table.append([
+                    group['instrument_type'],
+                    group['positions'].__len__(),
+                    f"{group['total_value']:.2f} {reference_currency}"
+                ])
 
-                # Print positions in each group
+            print(tabulate(groups_table, 
+                  headers=["Instrument Type", "Positions Count", "Total Value"], 
+                  tablefmt="grid"))
+
+            # Print detailed positions for each group
+            for group in data['instrument_groups']:
+                print(f"\n{group['instrument_type'].upper()} POSITIONS")
+                positions_table = []
                 for position in group['positions']:
-                    print(f"    - ID: {position['instrument_id']}")
-                    print(f"      Quantity: {position['quantity']}")
-                    print(f"      Original Value: {position['market_value']:.2f} {position['currency']}")
-                    print(f"      Value in Ref Currency: {position['value_in_ref_currency']:.2f} {reference_currency}")
+                    positions_table.append([
+                        position['instrument_id'],
+                        position['quantity'],
+                        f"{position['market_value']:.2f} {position['currency']}",
+                        f"{position['value_in_ref_currency']:.2f} {reference_currency}"
+                    ])
+
+                print(tabulate(positions_table, 
+                      headers=["Instrument ID", "Quantity", "Market Value", f"Value in {reference_currency}"], 
+                      tablefmt="grid"))
         else:
             print(f"Error: {response.status_code}")
             print(response.text)
