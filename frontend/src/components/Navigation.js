@@ -83,6 +83,14 @@ function Navigation() {
               </li>
               <li>
                 <NavLink 
+                  to="/portfolio-rest" 
+                  className={({ isActive }) => isActive ? "active-nav-link" : "nav-link"}
+                >
+                  REST API View
+                </NavLink>
+              </li>
+              <li>
+                <NavLink 
                   to="/" 
                   className={({ isActive }) => isActive ? "active-nav-link" : "nav-link"}
                 >
