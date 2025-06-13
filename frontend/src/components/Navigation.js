@@ -75,6 +75,14 @@ function Navigation() {
               </li>
               <li>
                 <NavLink 
+                  to="/basic-view" 
+                  className={({ isActive }) => isActive ? "active-nav-link" : "nav-link"}
+                >
+                  Basic View
+                </NavLink>
+              </li>
+              <li>
+                <NavLink 
                   to="/" 
                   className={({ isActive }) => isActive ? "active-nav-link" : "nav-link"}
                 >
