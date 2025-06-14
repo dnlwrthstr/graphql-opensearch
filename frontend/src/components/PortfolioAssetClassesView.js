@@ -123,16 +123,13 @@ function PortfolioAssetClassesView() {
                     <table className="data-table">
                       <thead>
                         <tr>
-                          <th colSpan={group.instrument_type === 'share' || group.instrument_type === 'structured_product' ? 5 : 4} className="section-header">Instrument Data</th>
-                          <th colSpan={1} className="section-header">Asset Class Info</th>
-                          <th colSpan={4} className="section-header">Position Values</th>
-                        </tr>
-                        <tr>
                           <th>ISIN</th>
                           <th>Name</th>
                           <th>Issuer</th>
-                          {group.instrument_type === 'share' || group.instrument_type === 'structured_product' ? (
-                            <th>Sector/Underlyings</th>
+                          {group.instrument_type === 'share' ? (
+                            <th>Sector</th>
+                          ) : group.instrument_type === 'structured_product' ? (
+                            <th>Underlyings</th>
                           ) : null}
                           <th>Country</th>
 
@@ -151,8 +148,10 @@ function PortfolioAssetClassesView() {
                             <td>{position.instrument?.isin || 'N/A'}</td>
                             <td>{position.instrument?.name || 'N/A'}</td>
                             <td>{position.instrument?.issuer || 'N/A'}</td>
-                            {position.instrument_type === 'share' || position.instrument_type === 'structured_product' ? (
-                              <td>{position.instrument_type === 'structured_product' ? (position.instrument?.underlyings?.join(', ') || 'N/A') : (position.instrument?.sector || 'N/A')}</td>
+                            {position.instrument_type === 'share' ? (
+                              <td>{position.instrument?.sector || 'N/A'}</td>
+                            ) : position.instrument_type === 'structured_product' ? (
+                              <td>{position.instrument?.underlyings?.join(', ') || 'N/A'}</td>
                             ) : null}
                             <td>{position.instrument?.country || 'N/A'}</td>
 
