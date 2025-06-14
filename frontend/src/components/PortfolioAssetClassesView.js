@@ -107,20 +107,20 @@ function PortfolioAssetClassesView() {
                   <table className="data-table">
                     <thead>
                       <tr>
-                        <th colSpan={5} className="section-header">Instrument Data</th>
-                        <th colSpan={3} className="section-header">Asset Class Info</th>
+                        <th colSpan={group.instrument_type === 'share' || group.instrument_type === 'structured_product' ? 5 : 4} className="section-header">Instrument Data</th>
+                        <th colSpan={1} className="section-header">Asset Class Info</th>
                         <th colSpan={4} className="section-header">Position Values</th>
                       </tr>
                       <tr>
                         <th>ISIN</th>
                         <th>Name</th>
                         <th>Issuer</th>
-                        <th>Sector</th>
+                        {group.instrument_type === 'share' || group.instrument_type === 'structured_product' ? (
+                          <th>Sector/Underlyings</th>
+                        ) : null}
                         <th>Country</th>
 
                         <th>Type</th>
-                        <th>Total Value</th>
-                        <th>% of Portfolio</th>
 
                         <th>Quantity</th>
                         <th>Market Value</th>
@@ -135,13 +135,13 @@ function PortfolioAssetClassesView() {
                           <td>{position.instrument?.isin || 'N/A'}</td>
                           <td>{position.instrument?.name || 'N/A'}</td>
                           <td>{position.instrument?.issuer || 'N/A'}</td>
-                          <td>{position.instrument?.sector || 'N/A'}</td>
+                          {position.instrument_type === 'share' || position.instrument_type === 'structured_product' ? (
+                            <td>{position.instrument_type === 'structured_product' ? (position.instrument?.underlyings?.join(', ') || 'N/A') : (position.instrument?.sector || 'N/A')}</td>
+                          ) : null}
                           <td>{position.instrument?.country || 'N/A'}</td>
 
                           {/* Asset Class Info (Middle) */}
                           <td>{position.instrument_type}</td>
-                          <td>{group.total_value.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                          <td>{((group.total_value / portfolioData.total_portfolio_value) * 100).toFixed(2)}%</td>
 
                           {/* Position Values (Right) */}
                           <td>{position.quantity.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
