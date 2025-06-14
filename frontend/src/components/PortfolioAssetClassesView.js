@@ -94,7 +94,7 @@ function PortfolioAssetClassesView() {
                   style={{
                     cursor: 'pointer',
                     padding: '10px',
-                    backgroundColor: '#f5f5f5',
+                    backgroundColor: '#d4e6ff',
                     border: '1px solid #ddd',
                     borderRadius: '4px',
                     marginBottom: '10px'
