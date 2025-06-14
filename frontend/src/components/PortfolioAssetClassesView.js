@@ -7,12 +7,21 @@ function PortfolioAssetClassesView() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [portfolioData, setPortfolioData] = useState(null);
+  const [expandedGroups, setExpandedGroups] = useState({});
+
+  const toggleGroupExpansion = (groupIndex) => {
+    setExpandedGroups(prev => ({
+      ...prev,
+      [groupIndex]: !prev[groupIndex]
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setPortfolioData(null);
+    setExpandedGroups({});
 
     try {
       // Use the portfolio endpoint as specified in the issue
@@ -72,45 +81,79 @@ function PortfolioAssetClassesView() {
 
           {portfolioData.instrument_groups.map((group, groupIndex) => (
             <div key={groupIndex} className="asset-class-section">
-              <h3>{group.instrument_type}</h3>
-              <p>Total Value: {group.total_value.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} {portfolioData.reference_currency}</p>
-              <p>Percentage of Portfolio: {((group.total_value / portfolioData.total_portfolio_value) * 100).toFixed(2)}%</p>
-              
-              <div className="positions-table-container">
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th colSpan={3} className="section-header">Instrument Data</th>
-                      <th colSpan={4} className="section-header">Position Values</th>
-                    </tr>
-                    <tr>
-                      <th>Instrument ID</th>
-                      <th>Name</th>
-                      <th>ISIN</th>
-                      <th>Quantity</th>
-                      <th>Market Value</th>
-                      <th>Currency</th>
-                      <th>Value in {portfolioData.reference_currency}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {group.positions.map((position, posIndex) => (
-                      <tr key={posIndex}>
-                        {/* Instrument Data (Left) */}
-                        <td>{position.instrument_id}</td>
-                        <td>{position.instrument?.name || 'N/A'}</td>
-                        <td>{position.instrument?.isin || 'N/A'}</td>
-                        
-                        {/* Position Values (Right) */}
-                        <td>{position.quantity.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                        <td>{position.market_value.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                        <td>{position.currency}</td>
-                        <td>{position.value_in_ref_currency.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div 
+                className="group-header" 
+                onClick={() => toggleGroupExpansion(groupIndex)}
+                style={{ 
+                  cursor: 'pointer',
+                  padding: '10px',
+                  backgroundColor: '#f5f5f5',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  marginBottom: '10px'
+                }}
+              >
+                <h3 style={{ margin: '0 0 5px 0' }}>
+                  {group.instrument_type} {expandedGroups[groupIndex] ? '▼' : '►'}
+                </h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <p style={{ margin: '5px 0' }}>Total Value: {group.total_value.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} {portfolioData.reference_currency}</p>
+                  <p style={{ margin: '5px 0' }}>Percentage of Portfolio: {((group.total_value / portfolioData.total_portfolio_value) * 100).toFixed(2)}%</p>
+                </div>
               </div>
+
+              {expandedGroups[groupIndex] && (
+                <div className="positions-table-container">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th colSpan={5} className="section-header">Instrument Data</th>
+                        <th colSpan={3} className="section-header">Asset Class Info</th>
+                        <th colSpan={4} className="section-header">Position Values</th>
+                      </tr>
+                      <tr>
+                        <th>ISIN</th>
+                        <th>Name</th>
+                        <th>Issuer</th>
+                        <th>Sector</th>
+                        <th>Country</th>
+
+                        <th>Type</th>
+                        <th>Total Value</th>
+                        <th>% of Portfolio</th>
+
+                        <th>Quantity</th>
+                        <th>Market Value</th>
+                        <th>Currency</th>
+                        <th>Value in {portfolioData.reference_currency}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {group.positions.map((position, posIndex) => (
+                        <tr key={posIndex}>
+                          {/* Instrument Data (Left) */}
+                          <td>{position.instrument?.isin || 'N/A'}</td>
+                          <td>{position.instrument?.name || 'N/A'}</td>
+                          <td>{position.instrument?.issuer || 'N/A'}</td>
+                          <td>{position.instrument?.sector || 'N/A'}</td>
+                          <td>{position.instrument?.country || 'N/A'}</td>
+
+                          {/* Asset Class Info (Middle) */}
+                          <td>{position.instrument_type}</td>
+                          <td>{group.total_value.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                          <td>{((group.total_value / portfolioData.total_portfolio_value) * 100).toFixed(2)}%</td>
+
+                          {/* Position Values (Right) */}
+                          <td>{position.quantity.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                          <td>{position.market_value.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                          <td>{position.currency}</td>
+                          <td>{position.value_in_ref_currency.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           ))}
         </div>
