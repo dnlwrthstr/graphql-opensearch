@@ -16,6 +16,7 @@ import InstrumentOverviewPage from './components/InstrumentOverviewPage';
 import Dashboard from './components/Dashboard';
 import BasicPortfolioView from './components/BasicPortfolioView';
 import PortfolioRestView from './components/PortfolioRestView';
+import PortfolioAssetClassesView from './components/PortfolioAssetClassesView';
 
 // Initialize Apollo Client
 const client = new ApolloClient({
@@ -45,6 +46,7 @@ function App() {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/basic-view" element={<BasicPortfolioView />} />
               <Route path="/portfolio-rest" element={<PortfolioRestView />} />
+              <Route path="/asset-classes" element={<PortfolioAssetClassesView />} />
             </Routes>
           </main>
         </div>

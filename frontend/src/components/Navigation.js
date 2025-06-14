@@ -91,6 +91,14 @@ function Navigation() {
               </li>
               <li>
                 <NavLink 
+                  to="/asset-classes" 
+                  className={({ isActive }) => isActive ? "active-nav-link" : "nav-link"}
+                >
+                  Asset Classes
+                </NavLink>
+              </li>
+              <li>
+                <NavLink 
                   to="/" 
                   className={({ isActive }) => isActive ? "active-nav-link" : "nav-link"}
                 >
