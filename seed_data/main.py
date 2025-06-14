@@ -1,6 +1,7 @@
 from seed_data.seed_partners import seed_partners
 from seed_data.seed_portfolios import seed_portfolios
 from seed_data.seed_instruments import seed_instruments
+from seed_data.seed_exchange_rates import seed_exchange_rates
 import os
 import argparse
 
@@ -21,6 +22,7 @@ def seed_all(force=False):
     seed_partners()
     seed_portfolios()
     seed_instruments()
+    seed_exchange_rates()
     print("All data seeded successfully.")
 
 if __name__ == "__main__":

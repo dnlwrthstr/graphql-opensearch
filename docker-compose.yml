@@ -39,6 +39,19 @@ services:
       - OPENSEARCH_INITIAL_ADMIN_PASSWORD=StrongP@ssw0rd!123
       - OPENSEARCH_USERNAME=admin
 
+  portfolio-aggregate-service:
+    build: ./portfolio-aggregate-service
+    container_name: portfolio-aggregate-service
+    ports:
+      - "8001:8000"
+    depends_on:
+      - opensearch
+    environment:
+      - OPENSEARCH_HOST=opensearch
+      - OPENSEARCH_PORT=9200
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=StrongP@ssw0rd!123
+      - OPENSEARCH_USERNAME=admin
+
   frontend:
     build: ./frontend
     container_name: react-frontend
@@ -46,3 +59,4 @@ services:
       - "3000:80"
     depends_on:
       - api
+      - portfolio-aggregate-service

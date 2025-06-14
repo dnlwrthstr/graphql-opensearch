@@ -7,20 +7,18 @@ A GraphQL API that provides a search interface for financial data stored in Open
 This project demonstrates how to build a GraphQL API that interfaces with OpenSearch to provide search capabilities. It includes:
 
 - A GraphQL API built with Ariadne and Starlette
-- A FastAPI microservice for portfolio aggregations
 - OpenSearch integration for full-text search
 - Docker containerization for easy deployment
 - Sample data seeding for demonstration purposes
 
 ## Architecture
 
-The project consists of five main services:
+The project consists of four main services:
 
 1. **OpenSearch**: A search engine that stores and indexes the data
 2. **OpenSearch Dashboard**: A web-based UI for interacting with OpenSearch
 3. **GraphQL API**: A Python-based API that provides a GraphQL interface to search the data
-4. **Portfolio Aggregate Service**: A FastAPI microservice for portfolio aggregations and calculations
-5. **React Frontend**: A web application that provides a user-friendly interface for searching financial instruments and partners
+4. **React Frontend**: A web application that provides a user-friendly interface for searching financial instruments and partners
 
 ## Installation
 
@@ -58,152 +56,6 @@ The project consists of five main services:
 ### GraphQL API
 
 You can interact with the GraphQL API using any GraphQL client (like GraphiQL, Insomnia, or Postman).
-
-### Portfolio Aggregate Service
-
-The project includes a FastAPI microservice for portfolio aggregations and calculations. This service is independent of the GraphQL server and can be deployed separately.
-
-#### Features
-- Convert all positions in a portfolio to a reference currency
-- Group positions by instrument type
-- Calculate total value for each instrument type group
-- Calculate currency exposure (sum of position values per currency)
-- Calculate instrument type exposure (sum of position values per instrument type)
-
-#### Running the Service
-1. Start the service directly:
-   ```
-   cd portfolio-aggregate-service
-   uvicorn app:app --reload
-   ```
-
-2. Or build and run the Docker container:
-   ```
-   cd portfolio-aggregate-service
-   docker build -t portfolio-aggregate-service .
-   docker run -p 8000:8000 portfolio-aggregate-service
-   ```
-
-3. The service will be available at http://localhost:8000 when running directly, or at http://localhost:8001 when running with Docker Compose
-
-#### API Endpoints
-
-**GET /portfolio/{portfolio_id}**
-
-Retrieves a portfolio with all positions converted to the specified reference currency and grouped by instrument type.
-
-Query Parameters:
-- `reference_currency` (required): The currency to convert all position values to (e.g., USD, EUR, CHF)
-
-Example Request:
-```
-GET http://localhost:8001/portfolio/portfolio_1?reference_currency=USD
-```
-
-Note: Use port 8000 if running the service directly, or port 8001 if running with Docker Compose.
-
-Example Response:
-```json
-{
-  "portfolio_id": "portfolio_1",
-  "reference_currency": "USD",
-  "positions": [
-    {
-      "instrument_id": "AAPL",
-      "quantity": 100,
-      "market_value": 15000,
-      "currency": "USD",
-      "instrument_type": "Share",
-      "converted_value": 15000
-    },
-    {
-      "instrument_id": "BOND1",
-      "quantity": 10,
-      "market_value": 10000,
-      "currency": "EUR",
-      "instrument_type": "Bond",
-      "converted_value": 11200
-    }
-  ],
-  "position_groups": [
-    {
-      "instrument_type": "Bond",
-      "positions": [...],
-      "total_value": 11200
-    },
-    {
-      "instrument_type": "Share",
-      "positions": [...],
-      "total_value": 15000
-    }
-  ]
-}
-```
-
-**GET /portfolio-aggregates/{portfolio_id}**
-
-Retrieves aggregated data for a portfolio, including currency exposure and instrument type exposure.
-
-Query Parameters:
-- `reference_currency` (required): The currency to convert all position values to (e.g., USD, EUR, CHF)
-
-Example Request:
-```
-GET http://localhost:8001/portfolio-aggregates/portfolio_1?reference_currency=USD
-```
-
-Example Response:
-```json
-{
-  "portfolio_id": "portfolio_1",
-  "valuation_currency": "USD",
-  "value_in_valuation_currency": 26200,
-  "currency_exposure": [
-    {
-      "currency": "USD",
-      "value": 15000
-    },
-    {
-      "currency": "EUR",
-      "value": 11200
-    }
-  ],
-  "instrument_type_exposure": [
-    {
-      "instrument_type": "Share",
-      "value": 15000
-    },
-    {
-      "instrument_type": "Bond",
-      "value": 11200
-    }
-  ]
-}
-```
-
-#### Testing the Service
-
-A test script is provided to demonstrate the portfolio aggregate service:
-
-```
-cd portfolio-aggregate-service
-python test_client.py <portfolio_id> <reference_currency> [<port>] [--aggregates]
-```
-
-Examples:
-```
-# For direct service (default port 8000)
-python test_client.py portfolio_1 USD
-
-# For Docker Compose service (port 8001)
-python test_client.py portfolio_1 USD 8001
-
-# Test the aggregates endpoint
-python test_client.py portfolio_1 USD --aggregates
-
-# Test the aggregates endpoint with custom port
-python test_client.py portfolio_1 USD 8001 --aggregates
-```
 
 ### Frontend Application
 

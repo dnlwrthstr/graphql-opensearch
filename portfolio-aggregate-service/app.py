@@ -6,7 +6,7 @@ import os
 from opensearchpy import OpenSearch
 
 # Create FastAPI app
-app = FastAPI(title="Portfolio Service", description="Service for portfolio calculations and aggregations")
+app = FastAPI(title="Portfolio Aggregate Service", description="Service for portfolio aggregations and calculations")
 
 # Define models
 class Position(BaseModel):
@@ -17,6 +17,7 @@ class Position(BaseModel):
     instrument_type: str
     ref_currency: str
     value_in_ref_currency: float
+    instrument: Dict = None
 
 class InstrumentGroup(BaseModel):
     instrument_type: str
@@ -28,6 +29,25 @@ class PortfolioResponse(BaseModel):
     reference_currency: str
     total_portfolio_value: float
     instrument_groups: List[InstrumentGroup]
+    portfolio_data: Dict = None
+
+class CurrencyExposure(BaseModel):
+    currency: str
+    value: float
+
+class InstrumentTypeExposure(BaseModel):
+    instrument_type: str
+    value: float
+    valuation_currency: str
+    value_in_valuation_currency: float
+    currency_exposure: List[CurrencyExposure]
+
+class PortfolioAggregatesResponse(BaseModel):
+    portfolio_id: str
+    valuation_currency: str
+    value_in_valuation_currency: float
+    currency_exposure: List[CurrencyExposure]
+    instrument_type_exposure: List[InstrumentTypeExposure]
 
 # Get OpenSearch client
 def get_opensearch_client():
@@ -141,7 +161,8 @@ async def get_portfolio(portfolio_id: str, reference_currency: str):
                     currency=position["currency"],
                     instrument_type=instrument.get("type", "Unknown"),
                     ref_currency=reference_currency,
-                    value_in_ref_currency=value_in_ref_currency
+                    value_in_ref_currency=value_in_ref_currency,
+                    instrument=instrument
                 )
 
                 enriched_positions.append(enriched_position)
@@ -175,7 +196,8 @@ async def get_portfolio(portfolio_id: str, reference_currency: str):
             portfolio_id=portfolio_id,
             reference_currency=reference_currency,
             total_portfolio_value=total_portfolio_value,
-            instrument_groups=[InstrumentGroup(**group) for group in instrument_groups_list]
+            instrument_groups=[InstrumentGroup(**group) for group in instrument_groups_list],
+            portfolio_data=portfolio
         )
 
         # Format response to match exactly the required JSON structure
@@ -183,6 +205,14 @@ async def get_portfolio(portfolio_id: str, reference_currency: str):
             "portfolio_id": response.portfolio_id,
             "reference_currency": response.reference_currency,
             "total_portfolio_value": response.total_portfolio_value,
+            "portfolio_data": {
+                "id": portfolio["id"],
+                "owner_id": portfolio["owner_id"],
+                "name": portfolio["name"],
+                "currency": portfolio["currency"],
+                "created_at": portfolio["created_at"],
+                "positions": portfolio.get("positions", [])
+            },
             "instrument_groups": []
         }
 
@@ -201,7 +231,8 @@ async def get_portfolio(portfolio_id: str, reference_currency: str):
                     "currency": position.currency,
                     "instrument_type": position.instrument_type,
                     "ref_currency": position.ref_currency,
-                    "value_in_ref_currency": position.value_in_ref_currency
+                    "value_in_ref_currency": position.value_in_ref_currency,
+                    "instrument": position.instrument
                 }
                 formatted_group["positions"].append(formatted_position)
 
@@ -211,6 +242,126 @@ async def get_portfolio(portfolio_id: str, reference_currency: str):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing portfolio: {str(e)}")
+
+@app.get("/portfolio-aggregates/{portfolio_id}")
+async def get_aggregates(portfolio_id: str, reference_currency: str):
+    client = get_opensearch_client()
+    exchange_rates = load_exchange_rates(client)
+
+    try:
+        # Get portfolio
+        portfolio_result = client.get(index="portfolios", id=portfolio_id)
+        portfolio = {"id": portfolio_result["_id"], **portfolio_result["_source"]}
+
+        # Get positions
+        positions = portfolio.get("positions", [])
+
+        # Get instrument details for each position and calculate values
+        enriched_positions = []
+        for position in positions:
+            try:
+                # Get instrument
+                instrument_result = client.get(index="financial_instruments", id=position["instrument_id"])
+                instrument = {"id": instrument_result["_id"], **instrument_result["_source"]}
+
+                # Convert market value to reference currency
+                value_in_ref_currency = convert_currency(
+                    position["market_value"],
+                    position["currency"],
+                    reference_currency,
+                    exchange_rates
+                )
+
+                # Create enriched position
+                enriched_position = {
+                    "instrument_id": position["instrument_id"],
+                    "quantity": position["quantity"],
+                    "market_value": position["market_value"],
+                    "currency": position["currency"],
+                    "instrument_type": instrument.get("type", "Unknown"),
+                    "ref_currency": reference_currency,
+                    "value_in_ref_currency": value_in_ref_currency
+                }
+
+                enriched_positions.append(enriched_position)
+            except Exception as e:
+                # Log error but continue processing other positions
+                print(f"Error processing position {position['instrument_id']}: {e}")
+
+        # Calculate total portfolio value
+        total_portfolio_value = sum(position["value_in_ref_currency"] for position in enriched_positions)
+
+        # Group by currency
+        currency_exposure = {}
+        for position in enriched_positions:
+            currency = position["currency"]
+            if currency not in currency_exposure:
+                currency_exposure[currency] = 0
+            currency_exposure[currency] += position["value_in_ref_currency"]
+
+        # Group by instrument type
+        instrument_type_exposure = {}
+        for position in enriched_positions:
+            instrument_type = position["instrument_type"]
+            if instrument_type not in instrument_type_exposure:
+                instrument_type_exposure[instrument_type] = 0
+            instrument_type_exposure[instrument_type] += position["value_in_ref_currency"]
+
+        # Create currency exposure list
+        currency_exposure_list = [
+            CurrencyExposure(currency=currency, value=value)
+            for currency, value in currency_exposure.items()
+        ]
+
+        # Create instrument type exposure list
+        instrument_type_exposure_list = [
+            InstrumentTypeExposure(
+                instrument_type=instrument_type,
+                value=value,
+                valuation_currency=reference_currency,
+                value_in_valuation_currency=total_portfolio_value,
+                currency_exposure=currency_exposure_list
+            )
+            for instrument_type, value in instrument_type_exposure.items()
+        ]
+
+        # Create and return the portfolio aggregates response
+        response = PortfolioAggregatesResponse(
+            portfolio_id=portfolio_id,
+            valuation_currency=reference_currency,
+            value_in_valuation_currency=total_portfolio_value,
+            currency_exposure=currency_exposure_list,
+            instrument_type_exposure=instrument_type_exposure_list
+        )
+
+        return {
+            "portfolio": {
+                "id": portfolio_id,
+                "value": total_portfolio_value,
+                "valuation_currency": reference_currency,
+                "value_in_valuation_currency": total_portfolio_value,
+                "currency_exposure": [
+                    {"currency": ce.currency, "value": ce.value}
+                    for ce in currency_exposure_list
+                ],
+                "instrument_exposures": [
+                    {
+                        "instrument_type": ite.instrument_type,
+                        "value": ite.value,
+                        "valuation_currency": ite.valuation_currency,
+                        "value_in_valuation_currency": ite.value_in_valuation_currency,
+                        "currency_exposure": [
+                            {"currency": ce.currency, "value": ce.value}
+                            for ce in ite.currency_exposure
+                        ]
+                    }
+                    for ite in instrument_type_exposure_list
+                ]
+            }
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing portfolio aggregates: {str(e)}")
 
 if __name__ == "__main__":
     import uvicorn
