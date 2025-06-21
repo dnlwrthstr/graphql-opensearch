@@ -20,7 +20,7 @@ import PortfolioAssetClassesView from './components/PortfolioAssetClassesView';
 
 // Initialize Apollo Client
 const client = new ApolloClient({
-  uri: '/graphql',  // Use relative URL for compatibility with Docker and local development
+  uri: process.env.REACT_APP_BACKEND_URL ? `${process.env.REACT_APP_BACKEND_URL}/graphql` : '/graphql',  // Use environment variable if available, otherwise use relative URL (for Docker)
   cache: new InMemoryCache()
 });
 
@@ -30,9 +30,9 @@ function App() {
     <ApolloProvider client={client}>
       <Router>
         <div className="App">
-          <aside className="sidebar">
+          <header className="top-nav-container">
             <Navigation />
-          </aside>
+          </header>
           <main>
             <Routes>
               <Route path="/" element={<PartnerPortfolioView />} />

@@ -12,14 +12,104 @@ body {
   text-align: center;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 0;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   gap: 20px; /* Spacing between components */
-  align-items: flex-start;
+  align-items: stretch;
 }
 
 /* Navigation Styles */
+/* Top Navigation Container */
+.top-nav-container {
+  width: 100%;
+  background-color: #f8f9fa;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+/* Top Navigation */
+.top-navigation {
+  display: flex;
+  align-items: center;
+  //padding: 0 30px;
+  height: 50px;
+  background-color: #f8f9fa;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.nav-brand {
+  font-size: 2.25rem;
+  font-weight: bold;
+  margin-right: 45px;
+  color: #333;
+}
+
+/* Top Navigation Menu */
+.top-nav-menu {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+.top-menu-item {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.top-menu-header {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: bold;
+  color: #333;
+  transition: color 0.3s;
+  font-size: 1.4rem;         /* More reasonable font size */
+}
+
+.top-menu-header:hover, .top-menu-header.active {
+  color: #4CAF50;
+}
+
+/* Top Submenu (Dropdown) */
+.top-submenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: white;
+  min-width: 300px;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+  list-style: none;
+  padding: 12px 0;
+  margin: 0;
+  z-index: 1001;
+  border-radius: 0 0 6px 6px;
+}
+
+.top-submenu li {
+  margin: 0;
+  padding: 0;
+}
+
+.top-submenu .nav-link, 
+.top-submenu .active-nav-link {
+  display: block;
+  padding: 15px 30px;
+  text-align: left;
+  border-radius: 0;
+  font-size: 1.2rem;
+}
+
+.top-submenu .nav-link:hover {
+  background-color: #f8f9fa;
+}
+
+/* Keep the original navigation styles for backward compatibility */
 .main-navigation {
   background-color: #fafafa;
   padding: 15px;
@@ -29,6 +119,7 @@ body {
   min-width: 240px;
   overflow-y: auto;
   align-self: stretch;
+  display: none; /* Hide the original navigation */
 }
 
 .nav-menu {
@@ -107,7 +198,8 @@ main {
   flex-direction: column;
   gap: 30px;
   flex: 1;
-  padding-top: 20px; /* Add padding to the top */
+  padding: 20px; /* Add padding all around */
+  margin-top: 10px; /* Add margin to separate from top navigation */
 }
 
 @media (min-width: 768px) {

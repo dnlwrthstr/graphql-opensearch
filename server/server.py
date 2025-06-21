@@ -3,6 +3,7 @@ from ariadne.asgi import GraphQL
 from opensearchpy import OpenSearch, AuthenticationException
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse
+from starlette.middleware.cors import CORSMiddleware
 import os
 import sys
 
@@ -1442,6 +1443,15 @@ schema = make_executable_schema(type_defs, query, partner_type, position_type, p
 
 # ASGI app
 app = Starlette()
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # React's default port
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all methods (GET, POST, PUT, DELETE, etc.)
+    allow_headers=["*"],  # Allow all headers
+)
 
 # Health check endpoint
 @app.route("/health")

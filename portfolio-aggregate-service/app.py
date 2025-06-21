@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Dict, Optional
 import json
@@ -7,6 +8,15 @@ from opensearchpy import OpenSearch
 
 # Create FastAPI app
 app = FastAPI(title="Portfolio Aggregate Service", description="Service for portfolio aggregations and calculations")
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # React's default port
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all methods (GET, POST, PUT, DELETE, etc.)
+    allow_headers=["*"],  # Allow all headers
+)
 
 # Define models
 class Position(BaseModel):
