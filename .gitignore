@@ -42,3 +42,4 @@ Thumbs.db
 # Project specific
 *.log
 .output.txt
+node_modules/
