@@ -24,8 +24,11 @@ function PortfolioAssetClassesView() {
     setExpandedGroups({});
 
     try {
-      // Use the portfolio endpoint as specified in the issue
-      const response = await axios.get(`/portfolio/${portfolioId}?reference_currency=${referenceCurrency}`);
+      // Use the portfolio service environment variable if available (http://localhost:8001 in npm mode)
+      // Otherwise fallback to backend URL (http://localhost:8000 in npm mode)
+      // Or use relative URL (for Docker mode where nginx handles proxying)
+      const baseUrl = process.env.REACT_APP_PORTFOLIO_SERVICE_URL || process.env.REACT_APP_BACKEND_URL || '';
+      const response = await axios.get(`${baseUrl}/portfolio/${portfolioId}?reference_currency=${referenceCurrency}`);
       setPortfolioData(response.data);
     } catch (err) {
       setError(err.response?.data?.detail || err.message || 'An error occurred');

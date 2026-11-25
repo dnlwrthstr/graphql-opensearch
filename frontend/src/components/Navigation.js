@@ -1,38 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import '../App.css';
 
 function Navigation() {
-  const [expandedItems, setExpandedItems] = useState({
-    partner: true,
-    portfolio: true,
-    instrument: true
-  });
+  const [activeDropdown, setActiveDropdown] = useState(null);
+  const dropdownRefs = useRef({});
 
-  const toggleExpand = (item) => {
-    setExpandedItems({
-      ...expandedItems,
-      [item]: !expandedItems[item]
-    });
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (activeDropdown && !dropdownRefs.current[activeDropdown]?.contains(event.target)) {
+        setActiveDropdown(null);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [activeDropdown]);
+
+  const toggleDropdown = (item) => {
+    setActiveDropdown(activeDropdown === item ? null : item);
+  };
+
+  // Close dropdown when a menu item is clicked
+  const handleNavLinkClick = () => {
+    setActiveDropdown(null);
   };
 
   return (
-    <nav>
-      <h2>Navigation</h2>
-      <ul className="nav-menu">
-        <li className="menu-item">
+    <nav className="top-navigation">
+      <ul className="top-nav-menu">
+        <li className="top-menu-item" ref={el => dropdownRefs.current.partner = el}>
           <div 
-            className="menu-header" 
-            onClick={() => toggleExpand('partner')}
+            className={`top-menu-header ${activeDropdown === 'partner' ? 'active' : ''}`}
+            onClick={() => toggleDropdown('partner')}
           >
-            Partner {expandedItems.partner ? '▼' : '►'}
+            Partner
           </div>
-          {expandedItems.partner && (
-            <ul className="submenu">
+          {activeDropdown === 'partner' && (
+            <ul className="top-submenu">
               <li>
                 <NavLink 
                   to="/partner-overview" 
                   className={({ isActive }) => isActive ? "active-nav-link" : "nav-link"}
+                  onClick={handleNavLinkClick}
                 >
                   Overview
                 </NavLink>
@@ -41,6 +54,7 @@ function Navigation() {
                 <NavLink 
                   to="/simple-search" 
                   className={({ isActive }) => isActive ? "active-nav-link" : "nav-link"}
+                  onClick={handleNavLinkClick}
                 >
                   Search by Name
                 </NavLink>
@@ -49,6 +63,7 @@ function Navigation() {
                 <NavLink 
                   to="/advanced-search" 
                   className={({ isActive }) => isActive ? "active-nav-link" : "nav-link"}
+                  onClick={handleNavLinkClick}
                 >
                   Advanced Search
                 </NavLink>
@@ -56,19 +71,20 @@ function Navigation() {
             </ul>
           )}
         </li>
-        <li className="menu-item">
+        <li className="top-menu-item" ref={el => dropdownRefs.current.portfolio = el}>
           <div 
-            className="menu-header" 
-            onClick={() => toggleExpand('portfolio')}
+            className={`top-menu-header ${activeDropdown === 'portfolio' ? 'active' : ''}`}
+            onClick={() => toggleDropdown('portfolio')}
           >
-            Portfolio {expandedItems.portfolio ? '▼' : '►'}
+            Portfolio
           </div>
-          {expandedItems.portfolio && (
-            <ul className="submenu">
+          {activeDropdown === 'portfolio' && (
+            <ul className="top-submenu">
               <li>
                 <NavLink 
                   to="/dashboard" 
                   className={({ isActive }) => isActive ? "active-nav-link" : "nav-link"}
+                  onClick={handleNavLinkClick}
                 >
                   Dashboard
                 </NavLink>
@@ -77,6 +93,7 @@ function Navigation() {
                 <NavLink 
                   to="/basic-view" 
                   className={({ isActive }) => isActive ? "active-nav-link" : "nav-link"}
+                  onClick={handleNavLinkClick}
                 >
                   Basic View
                 </NavLink>
@@ -85,6 +102,7 @@ function Navigation() {
                 <NavLink 
                   to="/portfolio-rest" 
                   className={({ isActive }) => isActive ? "active-nav-link" : "nav-link"}
+                  onClick={handleNavLinkClick}
                 >
                   REST API View
                 </NavLink>
@@ -93,6 +111,7 @@ function Navigation() {
                 <NavLink 
                   to="/asset-classes" 
                   className={({ isActive }) => isActive ? "active-nav-link" : "nav-link"}
+                  onClick={handleNavLinkClick}
                 >
                   Asset Classes
                 </NavLink>
@@ -101,6 +120,7 @@ function Navigation() {
                 <NavLink 
                   to="/" 
                   className={({ isActive }) => isActive ? "active-nav-link" : "nav-link"}
+                  onClick={handleNavLinkClick}
                 >
                   Search by Partner ID
                 </NavLink>
@@ -109,6 +129,7 @@ function Navigation() {
                 <NavLink 
                   to="/portfolios-with-instrument" 
                   className={({ isActive }) => isActive ? "active-nav-link" : "nav-link"}
+                  onClick={handleNavLinkClick}
                 >
                   Search by Instrument
                 </NavLink>
@@ -116,19 +137,20 @@ function Navigation() {
             </ul>
           )}
         </li>
-        <li className="menu-item">
+        <li className="top-menu-item" ref={el => dropdownRefs.current.instrument = el}>
           <div 
-            className="menu-header" 
-            onClick={() => toggleExpand('instrument')}
+            className={`top-menu-header ${activeDropdown === 'instrument' ? 'active' : ''}`}
+            onClick={() => toggleDropdown('instrument')}
           >
-            Instrument {expandedItems.instrument ? '▼' : '►'}
+            Instrument
           </div>
-          {expandedItems.instrument && (
-            <ul className="submenu">
+          {activeDropdown === 'instrument' && (
+            <ul className="top-submenu">
               <li>
                 <NavLink 
                   to="/instrument-overview" 
                   className={({ isActive }) => isActive ? "active-nav-link" : "nav-link"}
+                  onClick={handleNavLinkClick}
                 >
                   Overview
                 </NavLink>
@@ -137,6 +159,7 @@ function Navigation() {
                 <NavLink 
                   to="/simple-instrument-search" 
                   className={({ isActive }) => isActive ? "active-nav-link" : "nav-link"}
+                  onClick={handleNavLinkClick}
                 >
                   Search by Name or ISIN
                 </NavLink>
@@ -145,6 +168,7 @@ function Navigation() {
                 <NavLink 
                   to="/advanced-instrument-search" 
                   className={({ isActive }) => isActive ? "active-nav-link" : "nav-link"}
+                  onClick={handleNavLinkClick}
                 >
                   Advanced Search
                 </NavLink>
