@@ -56,13 +56,16 @@ def get_opensearch_client():
     port = int(os.environ.get("OPENSEARCH_PORT", 9200))
     username = os.environ.get("OPENSEARCH_USERNAME", "admin")
     password = os.environ.get("OPENSEARCH_INITIAL_ADMIN_PASSWORD", "StrongP@ssw0rd!123")
+    # HTTPS for clusters with the security plugin on (e.g. fintec-infra). Certificates
+    # are not verified: local clusters use self-signed ones.
+    use_ssl = os.environ.get("OPENSEARCH_USE_SSL", "false").lower() in ("1", "true", "yes")
 
     # Create the client instance
     client = OpenSearch(
         hosts=[{"host": host, "port": port}],
         http_auth=(username, password),
         http_compress=True,
-        use_ssl=False,
+        use_ssl=use_ssl,
         verify_certs=False,
         ssl_show_warn=False,
     )
