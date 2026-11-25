@@ -42,3 +42,6 @@ Thumbs.db
 # Project specific
 *.log
 .output.txt
+
+# Local secrets
+.env

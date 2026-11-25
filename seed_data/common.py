@@ -16,8 +16,10 @@ def get_opensearch_client():
         client = OpenSearch(
             hosts=[{"host": os.environ.get("OPENSEARCH_HOST", "localhost"), "port": 9200}],
             http_auth=(username, password),
-            use_ssl=False,
+            # HTTPS for clusters with the security plugin on (e.g. fintec-infra).
+            use_ssl=os.environ.get("OPENSEARCH_USE_SSL", "false").lower() in ("1", "true", "yes"),
             verify_certs=False,
+            ssl_show_warn=False,
             http_compress=True
         )
     except AuthenticationException as e:
